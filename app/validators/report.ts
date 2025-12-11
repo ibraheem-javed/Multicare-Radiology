@@ -1,0 +1,13 @@
+import vine from '@vinejs/vine'
+import type { ReportStatus } from '#models/report'
+
+export const reportValidator = vine.compile(
+  vine.object({
+    request_id: vine.string().uuid(),
+    findings: vine.string().minLength(10),
+    impression: vine.string().nullable(),
+    status: vine.enum(['draft', 'final'] as ReportStatus[]),
+    report_date: vine.date(),
+    radiologist_id: vine.string().uuid().nullable(),
+  })
+)

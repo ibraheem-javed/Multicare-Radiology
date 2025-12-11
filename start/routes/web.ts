@@ -1,0 +1,57 @@
+import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
+
+const PatientsController = () => import('#controllers/patients_controller')
+const RequestsController = () => import('#controllers/requests_controller')
+const ReportsController = () => import('#controllers/reports_controller')
+
+router
+  .group(() => {
+    // Home
+    router.on('/').renderInertia('home')
+
+    // Patients
+    router
+      .group(() => {
+        router.get('/', [PatientsController, 'index']).as('patients.index')
+        router.get('/create', [PatientsController, 'create']).as('patients.create')
+        router.post('/', [PatientsController, 'store']).as('patients.store')
+
+        router.get('/:id', [PatientsController, 'show']).as('patients.show')
+        router.get('/:id/edit', [PatientsController, 'edit']).as('patients.edit')
+        router.put('/:id', [PatientsController, 'update']).as('patients.update')
+      })
+      .prefix('patients')
+      .as('patients')
+
+    // Requests
+    router
+      .group(() => {
+        router.get('/', [RequestsController, 'index']).as('requests.index')
+        router.get('/create', [RequestsController, 'create']).as('requests.create')
+        router.post('/', [RequestsController, 'store']).as('requests.store')
+
+        router.get('/:id', [RequestsController, 'show']).as('requests.show')
+        router.get('/:id/edit', [RequestsController, 'edit']).as('requests.edit')
+        router.put('/:id', [RequestsController, 'update']).as('requests.update')
+        router.delete('/:id', [RequestsController, 'destroy']).as('requests.destroy')
+      })
+      .prefix('requests')
+      .as('requests')
+
+    // Reports
+    router
+      .group(() => {
+        router.get('/', [ReportsController, 'index']).as('reports.index')
+        router.get('/create', [ReportsController, 'create']).as('reports.create')
+        router.post('/', [ReportsController, 'store']).as('reports.store')
+
+        router.get('/:id', [ReportsController, 'show']).as('reports.show')
+        router.get('/:id/edit', [ReportsController, 'edit']).as('reports.edit')
+        router.put('/:id', [ReportsController, 'update']).as('reports.update')
+        router.delete('/:id', [ReportsController, 'destroy']).as('reports.destroy')
+      })
+      .prefix('reports')
+      .as('reports')
+  })
+  .use(middleware.auth())
