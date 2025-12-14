@@ -1,6 +1,6 @@
 import Report from '#models/report'
 import Request from '#models/request'
-import Patient from '#models/patient'
+//import Patient from '#models/patient'
 import User from '#models/user'
 import { reportValidator } from '#validators/report'
 import type { HttpContext } from '@adonisjs/core/http'

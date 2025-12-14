@@ -5,6 +5,9 @@ import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import PasswordResetToken from './password_reset_token.js'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
+import Role from './role.js'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { belongsTo } from '@adonisjs/lucid/orm'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -27,6 +30,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ serializeAs: null })
   declare password: string
 
+  @column()
+  declare roleId: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -35,4 +41,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => PasswordResetToken)
   declare passwordResetTokens: HasMany<typeof PasswordResetToken>
+
+  @belongsTo(() => Role)
+  declare role: BelongsTo<typeof Role>
 }

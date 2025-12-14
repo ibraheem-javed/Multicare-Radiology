@@ -13,7 +13,12 @@ export default class WebLogin {
   constructor(protected ctx: HttpContext) {}
 
   async handle({ data }: Params) {
+    console.log('action method hitting')
+    console.log(data.email)
+    console.log(data.password)
+
     const user = await User.verifyCredentials(data.email, data.password)
+    console.log(user)
     await this.ctx.auth.use('web').login(user)
 
     return user
