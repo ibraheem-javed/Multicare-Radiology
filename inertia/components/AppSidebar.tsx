@@ -37,6 +37,12 @@ const items = [
     icon: Search,
     internal: false, // placeholder
   },
+  {
+    title: 'Users',
+    url: '/users',
+    icon: Search,
+    internal: false, // placeholder
+  },
 ]
 
 export function AppSidebar() {

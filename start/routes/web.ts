@@ -5,6 +5,7 @@ import Roles from '#enums/roles'
 const PatientsController = () => import('#controllers/patients_controller')
 const RequestsController = () => import('#controllers/requests_controller')
 const ReportsController = () => import('#controllers/reports_controller')
+const UsersController = () => import('#controllers/users_controller')
 
 router
   .group(() => {
@@ -75,5 +76,20 @@ router
       })
       .prefix('reports')
       .as('reports')
+
+    //user routes only for admin
+    router
+      .group(() => {
+        router.get('/', [UsersController, 'index']).as('users.index')
+        router.get('/create', [UsersController, 'create']).as('users.create')
+        router.post('/', [UsersController, 'store']).as('users.store')
+        router.get('/:id', [UsersController, 'show']).as('users.show')
+        router.get('/:id/edit', [UsersController, 'edit']).as('users.edit')
+        router.put('/:id', [UsersController, 'update']).as('users.update')
+        router.delete('/:id', [UsersController, 'destroy']).as('users.destroy')
+      })
+      .prefix('users') // now /users, /users/create, /users/:id, etc.
+      .as('users')
+      .middleware([middleware.auth(), middleware.checkRole({ roles: [Roles.ADMIN] })])
   })
   .middleware([middleware.auth()])
