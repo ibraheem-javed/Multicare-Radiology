@@ -1,7 +1,9 @@
 enum Roles {
   ADMIN = 1,
-  RADIOGRAPHER = 2,
-  RADIOLOGIST = 3,
+  RECEPTION = 2,
+  RADIOGRAPHER = 3,
+  RADIOLOGIST = 4,
+  MANAGER = 5,
 }
 
 export default Roles

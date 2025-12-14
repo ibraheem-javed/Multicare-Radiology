@@ -26,13 +26,13 @@ const items = [
   },
 
   {
-    title: 'Patient History',
+    title: 'Patient Requests',
     url: '/requests',
     icon: Hospital,
     internal: true,
   },
   {
-    title: 'Reports',
+    title: 'Patient Reports',
     url: '/reports',
     icon: Search,
     internal: false, // placeholder

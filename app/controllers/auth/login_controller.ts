@@ -16,6 +16,7 @@ export default class LoginController {
       await webLogin.handle({ data })
       return response.redirect().toPath('/')
     } catch (error) {
+      console.log(error)
       session.flash('error', 'Invalid credentials')
       return response.redirect().toRoute('login.show')
     }
