@@ -8,7 +8,7 @@ export default class GetPatientsForCreate {
    * Used in: RequestsController.create(), RequestsController.edit()
    */
   async handle() {
-    const patients = await Patient.query().orderBy('first_name', 'asc')
+    const patients = await Patient.query().orderBy('firstName', 'asc')
     const users = await User.query().orderBy('firstName', 'asc')
 
     return {

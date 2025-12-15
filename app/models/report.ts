@@ -32,7 +32,7 @@ export default class Report extends BaseModel {
   @column()
   declare status: ReportStatus
 
-  @column.date()
+  @column.date({ columnName: 'report_date' })
   declare reportDate: DateTime
 
   @column.dateTime({ autoCreate: true })

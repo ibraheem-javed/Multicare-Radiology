@@ -1,7 +1,41 @@
 import type Request from '#models/request'
 import PatientDTO from '#dtos/patient'
+import { DateTime } from 'luxon'
 
 export default class RequestDTO {
+  /**
+   * Format date to readable format: "Jan 01, 2000"
+   * Handles both string and DateTime objects from Lucid ORM
+   */
+  private static formatDate(value: string | DateTime | null): string | null {
+    if (!value) return null
+
+    try {
+      let date: DateTime
+
+      if (value instanceof DateTime) {
+        date = value
+      } else if (typeof value === 'string') {
+        date = DateTime.fromISO(value)
+
+        if (!date.isValid) {
+          date = DateTime.fromFormat(value, 'yyyy-MM-dd')
+        }
+      } else {
+        return null
+      }
+
+      if (!date.isValid) {
+        return null
+      }
+
+      return date.toFormat('MMM dd, yyyy')
+    } catch (error) {
+      console.error('Date formatting error:', error)
+      return null
+    }
+  }
+
   /**
    * Transform Request model to frontend format (camelCase)
    * Database uses snake_case, frontend uses camelCase
@@ -11,7 +45,7 @@ export default class RequestDTO {
     return {
       id: request.id,
       procedureType: request.procedureType,
-      requestDate: request.requestDate.toISODate(),
+      requestDate: this.formatDate(request.requestDate),
       status: request.status,
       patient: request.patient ? PatientDTO.toMinimal(request.patient) : null,
       requestedBy: request.requestedBy
@@ -40,7 +74,7 @@ export default class RequestDTO {
     return {
       id: request.id,
       procedureType: request.procedureType,
-      requestDate: request.requestDate.toISODate(),
+      requestDate: this.formatDate(request.requestDate),
       status: request.status,
       patient: request.patient ? PatientDTO.toMinimal(request.patient) : null,
       requestedBy: request.requestedBy
@@ -54,8 +88,8 @@ export default class RequestDTO {
   }
 
   /**
-   * Transform Request model for edit form
-   * Note: Form fields use snake_case to match validator
+   * Transform Request model for edit form (snake_case, unformatted dates)
+   * Form fields must match validator field names
    * Used in: edit view
    */
   static toEditForm(request: Request) {
@@ -96,8 +130,8 @@ export default class RequestDTO {
   static patientToDropdown(patient: any) {
     return {
       id: patient.id,
-      firstName: patient.first_name,
-      lastName: patient.last_name,
+      firstName: patient.firstName,
+      lastName: patient.lastName,
     }
   }
 

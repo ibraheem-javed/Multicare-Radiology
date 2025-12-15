@@ -12,14 +12,14 @@ import {
 
 type Patient = {
   id: string
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
 }
 
 type User = {
   id: string
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
 }
 
 type Request = {
@@ -66,7 +66,7 @@ export default function RequestEditPage() {
             <SelectContent>
               {patients.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
-                  {p.first_name} {p.last_name}
+                  {p.firstName} {p.lastName}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -95,7 +95,7 @@ export default function RequestEditPage() {
             <SelectContent>
               {users.map((u) => (
                 <SelectItem key={u.id} value={u.id}>
-                  {u.first_name} {u.last_name}
+                  {u.firstName} {u.lastName}
                 </SelectItem>
               ))}
             </SelectContent>

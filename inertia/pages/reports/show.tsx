@@ -6,10 +6,10 @@ type ReportShowPageProps = {
     id: string
     findings: string
     impression?: string | null
-    report_date: string
+    reportDate: string
     status: string
-    patient: { first_name: string; last_name: string }
-    radiologist?: { first_name: string; last_name: string } | null
+    patient: { firstName: string; lastName: string }
+    radiologist?: { firstName: string; lastName: string } | null
     request?: { procedureType: string } | null
   }
 }
@@ -27,26 +27,28 @@ export default function ReportShowPage() {
             <Button>Edit</Button>
           </Link>
 
-          <Link href={`/reports/${report.id}/print`} method="get">
-            <Button variant="outline">Print</Button>
-          </Link>
+          {report.status === 'final' && (
+            <Link href={`/reports/${report.id}/print`} method="get">
+              <Button variant="outline">Print</Button>
+            </Link>
+          )}
         </div>
       </div>
 
       <div className="space-y-2 text-sm">
         <div>
-          <strong>Patient:</strong> {report.patient.first_name} {report.patient.last_name}
+          <strong>Patient:</strong> {report.patient.firstName} {report.patient.lastName}
         </div>
 
         <div>
           <strong>Radiologist:</strong>{' '}
           {report.radiologist
-            ? `${report.radiologist.first_name} ${report.radiologist.last_name}`
+            ? `${report.radiologist.firstName} ${report.radiologist.lastName}`
             : '-'}
         </div>
 
         <div>
-          <strong>Date:</strong> {report.report_date}
+          <strong>Date:</strong> {report.reportDate}
         </div>
 
         <div>

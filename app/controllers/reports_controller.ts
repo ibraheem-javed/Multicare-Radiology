@@ -1,4 +1,4 @@
-import { reportValidator } from '#validators/report'
+import { reportValidator, updateReportValidator } from '#validators/report'
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import GetAllReports from '#actions/reports/get_all_reports'
@@ -53,7 +53,7 @@ export default class ReportsController {
   }
 
   async update({ params, request, response }: HttpContext) {
-    const data = await request.validateUsing(reportValidator)
+    const data = await request.validateUsing(updateReportValidator)
 
     await this.updateReport.handle(params.id, data)
 
