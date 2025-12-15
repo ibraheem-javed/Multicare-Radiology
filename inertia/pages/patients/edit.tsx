@@ -4,7 +4,7 @@ import { Label } from '~/components/ui/label'
 import { Button } from '~/components/ui/button'
 
 type Patient = {
-  id: number
+  id: string
   firstName: string
   lastName: string
   dateOfBirth?: string | null
@@ -14,12 +14,35 @@ type Patient = {
 export default function PatientEditPage() {
   const { patient } = usePage<{ patient: Patient }>().props
 
+  // Helper to convert formatted date (Jan 01, 2000) back to ISO format (2000-01-01)
+  const convertFormattedDateToISO = (formatted: string | null | undefined): string => {
+    if (!formatted) return ''
+    try {
+      // Handle null or invalid dates
+      if (formatted === 'null' || formatted === '-') return ''
+
+      // Try parsing with Date constructor first
+      const date = new Date(formatted)
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return ''
+      }
+
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    } catch (error) {
+      console.error('Date conversion error:', error)
+      return ''
+    }
+  }
+
   const { data, setData, put, errors, processing } = useForm({
     first_name: patient.firstName,
     last_name: patient.lastName,
-    date_of_birth: patient.dateOfBirth
-      ? new Date(patient.dateOfBirth).toISOString().split('T')[0]
-      : '',
+    date_of_birth: convertFormattedDateToISO(patient.dateOfBirth),
     gender: patient.gender,
     phone: patient.phone,
   })
@@ -28,7 +51,6 @@ export default function PatientEditPage() {
     e.preventDefault()
     put(`/patients/${patient.id}`)
   }
-  console.log(data.date_of_birth)
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Edit Patient</h1>

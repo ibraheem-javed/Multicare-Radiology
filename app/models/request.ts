@@ -16,13 +16,13 @@ export default class Request extends BaseModel {
   @column({ columnName: 'patient_id' })
   declare patientId: string
 
-  @column()
+  @column({ columnName: 'procedure_type' })
   declare procedureType: string
 
   @column({ columnName: 'requested_by' })
   declare requestedById: string
 
-  @column.date()
+  @column.date({ columnName: 'request_date' })
   declare requestDate: DateTime
 
   @column()

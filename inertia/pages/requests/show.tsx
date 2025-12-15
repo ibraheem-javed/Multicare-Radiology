@@ -3,23 +3,23 @@ import { Button } from '~/components/ui/button'
 
 interface Patient {
   id: string
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
 }
 
 interface User {
   id: string
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
 }
 
 interface Request {
   id: string
-  procedure_type: string
-  request_date: string
+  procedureType: string
+  requestDate: string
   status: string
-  patient: Patient
-  requested_by: User
+  patient: Patient | null
+  requestedBy: User | null
 }
 
 export default function RequestShowPage() {
@@ -36,17 +36,18 @@ export default function RequestShowPage() {
 
       <div className="space-y-2 text-sm">
         <div>
-          <strong>Patient:</strong> {request.patient.first_name} {request.patient.last_name}
+          <strong>Patient:</strong>{' '}
+          {request.patient ? `${request.patient.firstName} ${request.patient.lastName}` : '-'}
         </div>
         <div>
-          <strong>Procedure:</strong> {request.procedure_type}
+          <strong>Procedure:</strong> {request.procedureType}
         </div>
         <div>
-          <strong>Requested By:</strong> {request.requested_by.first_name}{' '}
-          {request.requested_by.last_name}
+          <strong>Requested By:</strong>{' '}
+          {request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : '-'}
         </div>
         <div>
-          <strong>Date:</strong> {request.request_date}
+          <strong>Date:</strong> {request.requestDate}
         </div>
         <div>
           <strong>Status:</strong> {request.status}

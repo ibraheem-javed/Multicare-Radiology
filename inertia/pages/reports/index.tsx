@@ -3,9 +3,9 @@ import { Button } from '~/components/ui/button'
 
 type Report = {
   id: string
-  patient: { first_name: string; last_name: string }
-  radiologist?: { first_name: string; last_name: string } | null
-  report_date: string
+  patient: { firstName: string; lastName: string } | null
+  radiologist?: { firstName: string; lastName: string } | null
+  reportDate: string
   status: string
   findingsPreview: string
 }
@@ -37,12 +37,12 @@ export default function ReportsIndex() {
             {reports.map((r) => (
               <tr key={r.id} className="border-t">
                 <td className="p-2">
-                  {r.patient.first_name} {r.patient.last_name}
+                  {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
                 </td>
                 <td className="p-2">
-                  {r.radiologist ? `${r.radiologist.first_name} ${r.radiologist.last_name}` : '-'}
+                  {r.radiologist ? `${r.radiologist.firstName} ${r.radiologist.lastName}` : '-'}
                 </td>
-                <td className="p-2">{r.report_date}</td>
+                <td className="p-2">{r.reportDate}</td>
                 <td className="p-2 capitalize">{r.status}</td>
                 <td className="p-2 text-right">
                   <Link href={`/reports/${r.id}`} className="text-blue-600 hover:underline">

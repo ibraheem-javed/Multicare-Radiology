@@ -3,23 +3,23 @@ import { Button } from '~/components/ui/button'
 
 interface Patient {
   id: string
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
 }
 
 interface User {
   id: string
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
 }
 
 interface Request {
   id: string
-  procedure_type: string
-  request_date: string
+  procedureType: string
+  requestDate: string
   status: string
-  patient: Patient
-  requested_by: User
+  patient: Patient | null
+  requestedBy: User | null
 }
 
 export default function RequestsIndex() {
@@ -50,13 +50,13 @@ export default function RequestsIndex() {
             {requests.map((r) => (
               <tr key={r.id} className="border-t">
                 <td className="p-2">
-                  {r.patient.first_name} {r.patient.last_name}
+                  {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
                 </td>
-                <td className="p-2">{r.procedure_type}</td>
+                <td className="p-2">{r.procedureType}</td>
                 <td className="p-2">
-                  {r.requested_by.first_name} {r.requested_by.last_name}
+                  {r.requestedBy ? `${r.requestedBy.firstName} ${r.requestedBy.lastName}` : '-'}
                 </td>
-                <td className="p-2">{r.request_date}</td>
+                <td className="p-2">{r.requestDate}</td>
                 <td className="p-2 capitalize">{r.status}</td>
                 <td className="p-2 text-right">
                   <Link href={`/requests/${r.id}`} className="text-blue-600 hover:underline">
