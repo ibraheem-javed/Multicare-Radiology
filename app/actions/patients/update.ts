@@ -37,10 +37,6 @@ export default class UpdatePatient {
 
     patient.merge(updateData)
     await patient.save()
-
-    // Future: Add notification logic here
-    // await notifyPatientUpdate(patient)
-
     return patient
   }
 }

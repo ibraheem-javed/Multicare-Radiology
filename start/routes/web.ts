@@ -16,13 +16,13 @@ router
     router
       .group(() => {
         router.get('/', [PatientsController, 'index']).as('patients.index')
-        router.get('/create', [PatientsController, 'create']).as('patients.create')
+        router.get('/create', [PatientsController, 'showCreateForm']).as('patients.create')
         router
           .post('/', [PatientsController, 'store'])
           .as('patients.store')
           .middleware([middleware.checkRole({ roles: [Roles.RECEPTION, Roles.ADMIN] })])
         router.get('/:id', [PatientsController, 'show']).as('patients.show')
-        router.get('/:id/edit', [PatientsController, 'edit']).as('patients.edit')
+        router.get('/:id/edit', [PatientsController, 'showEditForm']).as('patients.edit')
         router
           .put('/:id', [PatientsController, 'update'])
           .as('patients.update')
@@ -35,13 +35,13 @@ router
     router
       .group(() => {
         router.get('/', [RequestsController, 'index']).as('requests.index')
-        router.get('/create', [RequestsController, 'create']).as('requests.create')
+        router.get('/create', [RequestsController, 'showCreateForm']).as('requests.create')
         router
           .post('/', [RequestsController, 'store'])
           .as('requests.store')
           .middleware([middleware.checkRole({ roles: [Roles.RECEPTION, Roles.ADMIN] })])
         router.get('/:id', [RequestsController, 'show']).as('requests.show')
-        router.get('/:id/edit', [RequestsController, 'edit']).as('requests.edit')
+        router.get('/:id/edit', [RequestsController, 'showEditForm']).as('requests.edit')
         router
           .put('/:id', [RequestsController, 'update'])
           .as('requests.update')
@@ -58,13 +58,13 @@ router
     router
       .group(() => {
         router.get('/', [ReportsController, 'index']).as('reports.index')
-        router.get('/create', [ReportsController, 'create']).as('reports.create')
+        router.get('/create', [ReportsController, 'showCreateForm']).as('reports.create')
         router
           .post('/', [ReportsController, 'store'])
           .as('reports.store')
           .middleware([middleware.checkRole({ roles: [Roles.RADIOLOGIST, Roles.ADMIN] })])
         router.get('/:id', [ReportsController, 'show']).as('reports.show')
-        router.get('/:id/edit', [ReportsController, 'edit']).as('reports.edit')
+        router.get('/:id/edit', [ReportsController, 'showEditForm']).as('reports.edit')
         router
           .put('/:id', [ReportsController, 'update'])
           .as('reports.update')
@@ -81,10 +81,10 @@ router
     router
       .group(() => {
         router.get('/', [UsersController, 'index']).as('users.index')
-        router.get('/create', [UsersController, 'create']).as('users.create')
+        router.get('/create', [UsersController, 'showCreateForm']).as('users.create')
         router.post('/', [UsersController, 'store']).as('users.store')
         router.get('/:id', [UsersController, 'show']).as('users.show')
-        router.get('/:id/edit', [UsersController, 'edit']).as('users.edit')
+        router.get('/:id/edit', [UsersController, 'showEditForm']).as('users.edit')
         router.put('/:id', [UsersController, 'update']).as('users.update')
         router.delete('/:id', [UsersController, 'destroy']).as('users.destroy')
       })

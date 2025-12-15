@@ -1,18 +1,8 @@
-import Request, { RequestStatus } from '#models/request'
+import Request from '#models/request'
+import { RequestStatus } from '#enums/request_status'
 import { DateTime } from 'luxon'
 
 export default class UpdateRequest {
-  /**
-   * Update an existing radiology request
-   * Used in: RequestsController.update()
-   *
-   * Future: Can add logic for:
-   * - Detecting status changes and sending notifications
-   * - Validating status transitions (pending -> completed)
-   * - Logging changes for audit trail
-   * - Updating related calendar appointments
-   * - Notifying patient of changes
-   */
   async handle(
     id: string,
     data: {
@@ -25,12 +15,8 @@ export default class UpdateRequest {
   ) {
     const request = await Request.findOrFail(id)
 
-    // Future: Detect status change
-    // const oldStatus = request.status
-    // const newStatus = data.status
-
     // Map snake_case to camelCase for Lucid
-    const updateData: any = {}
+    const updateData: Partial<Record<string, unknown>> = {}
     if (data.patient_id) updateData.patientId = data.patient_id
     if (data.procedure_type) updateData.procedureType = data.procedure_type
     if (data.requested_by) updateData.requestedById = data.requested_by
@@ -39,11 +25,6 @@ export default class UpdateRequest {
 
     request.merge(updateData)
     await request.save()
-
-    // Future: Add notification logic based on status change
-    // if (oldStatus !== newStatus) {
-    //   await notifyStatusChange(request, oldStatus, newStatus)
-    // }
 
     return request
   }

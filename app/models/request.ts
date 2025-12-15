@@ -3,11 +3,7 @@ import { DateTime } from 'luxon'
 import Patient from './patient.js'
 import User from './user.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-
-export enum RequestStatus {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-}
+import { RequestStatus } from '#enums/request_status'
 
 export default class Request extends BaseModel {
   @column({ isPrimary: true })

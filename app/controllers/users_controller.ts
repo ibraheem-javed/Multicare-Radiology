@@ -1,94 +1,60 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import User from '#models/user'
-import hash from '@adonisjs/core/services/hash'
 import Roles from '#enums/roles'
-import { userValidator } from '#validators/user'
+import { userValidator, userUpdateValidator } from '#validators/user'
+import ListUsers from '#actions/user/get_all'
+import GetUser from '#actions/user/get_single'
+import CreateUser from '#actions/user/create'
+import UpdateUser from '#actions/user/update'
+import DeleteUser from '#actions/user/delete'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class UsersController {
-  // List all users
-  async index({ inertia }: HttpContext) {
-    const users = await User.query().orderBy('firstName', 'asc')
+  constructor(
+    protected listUsers: ListUsers,
+    protected getUser: GetUser,
+    protected createUser: CreateUser,
+    protected updateUser: UpdateUser,
+    protected deleteUser: DeleteUser
+  ) {}
 
-    const mapped = users.map((u) => ({
-      id: u.id,
-      firstName: u.firstName,
-      lastName: u.lastName,
-      email: u.email,
-      role: { id: u.roleId, name: Roles[u.roleId] }, // mapping roleId to role name
-      createdAt: u.createdAt,
-      updatedAt: u.updatedAt,
-    }))
-
-    return inertia.render('users/index', { users: mapped })
+  async index({ inertia, auth }: HttpContext) {
+    const users = await this.listUsers.handle({ excludeUserId: auth.user!.id })
+    return inertia.render('users/index', { users })
   }
 
-  // Show create user form
-  async create({ inertia }: HttpContext) {
+  async showCreateForm({ inertia }: HttpContext) {
     return inertia.render('users/create', { roles: Roles })
   }
 
-  // Store new user
   async store({ request, response }: HttpContext) {
     const data = await request.validateUsing(userValidator)
-
-    await User.create({
-      firstName: data.first_name,
-      lastName: data.last_name ?? null,
-      email: data.email,
-      password: await hash.make(data.password),
-      roleId: data.role_id,
-    })
-
+    try {
+      await this.createUser.handle(data)
+    } catch (err: any) {
+      return response.badRequest({ message: err.message })
+    }
     return response.redirect().toPath('/users')
   }
 
-  // Show single user
   async show({ params, inertia }: HttpContext) {
-    const user = await User.findOrFail(params.id)
-
-    const mapped = {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: { id: user.roleId, name: Roles[user.roleId] },
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    }
-
-    return inertia.render('users/show', { user: mapped })
+    const user = await this.getUser.handle(params.id)
+    return inertia.render('users/show', { user })
   }
 
-  // Edit user form
-  async edit({ params, inertia }: HttpContext) {
-    const user = await User.findOrFail(params.id)
+  async showEditForm({ params, inertia }: HttpContext) {
+    const user = await this.getUser.handle(params.id)
     return inertia.render('users/edit', { user, roles: Roles })
   }
 
-  // Update user
   async update({ params, request, response }: HttpContext) {
-    const user = await User.findOrFail(params.id)
-    const data = await request.validateUsing(userValidator)
-
-    user.merge({
-      firstName: data.first_name,
-      lastName: data.last_name ?? null,
-      email: data.email,
-      roleId: data.role_id,
-    })
-
-    if (data.password) {
-      user.password = await hash.make(data.password)
-    }
-
-    await user.save()
-    return response.redirect().toPath(`/users/${user.id}`)
+    const data = await request.validateUsing(userUpdateValidator)
+    await this.updateUser.handle({ userId: params.id, ...data })
+    return response.redirect().toPath(`/users/${params.id}`)
   }
 
-  // Delete user
   async destroy({ params, response }: HttpContext) {
-    const user = await User.findOrFail(params.id)
-    await user.delete()
+    await this.deleteUser.handle(params.id)
     return response.redirect().toPath('/users')
   }
 }
