@@ -1,5 +1,5 @@
 import vine from '@vinejs/vine'
-import type { ReportStatus } from '#models/report'
+import { ReportStatus } from '#enums/report_status'
 
 export const reportValidator = vine.compile(
   vine.object({

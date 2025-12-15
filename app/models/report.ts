@@ -4,11 +4,7 @@ import Patient from './patient.js'
 import User from './user.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
-
-export enum ReportStatus {
-  DRAFT = 'draft',
-  FINAL = 'final',
-}
+import { ReportStatus } from '#enums/report_status'
 
 export default class Report extends BaseModel {
   @column({ isPrimary: true })

@@ -1,15 +1,16 @@
 import vine from '@vinejs/vine'
+import { RequestStatus } from '#enums/request_status'
 
 export const requestValidator = vine.compile(
   vine.object({
-    patient_id: vine.string().uuid(), // required by default
-    procedure_type: vine.string().trim().minLength(1), // required
-    requested_by: vine.string().uuid(), // required
-    request_date: vine.date(), // required by default
+    patient_id: vine.string().uuid(),
+    procedure_type: vine.string().trim().minLength(1),
+    requested_by: vine.string().uuid(),
+    request_date: vine.date(),
     status: vine
-      .enum(['pending', 'completed'])
+      .enum(Object.values(RequestStatus)) // Use enum values
       .optional()
       .nullable()
-      .transform((val) => val ?? 'pending'),
+      .transform((val) => val ?? RequestStatus.PENDING), // default to PENDING
   })
 )

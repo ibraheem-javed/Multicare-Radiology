@@ -2,6 +2,13 @@ import { useForm, Head } from '@inertiajs/react'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
 import { Label } from '~/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 import RolesEnum from '#enums/roles'
 
 type CreateUserProps = {
@@ -27,7 +34,7 @@ export default function CreateUser({ roles }: CreateUserProps) {
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
-    post('/users') // updated route
+    post('/users')
   }
 
   return (
@@ -38,18 +45,27 @@ export default function CreateUser({ roles }: CreateUserProps) {
 
       <form onSubmit={submit} className="space-y-4 max-w-md">
         <div>
-          <Label>First Name</Label>
-          <Input value={data.first_name} onChange={(e) => setData('first_name', e.target.value)} />
-        </div>
-
-        <div>
-          <Label>Last Name</Label>
-          <Input value={data.last_name} onChange={(e) => setData('last_name', e.target.value)} />
-        </div>
-
-        <div>
-          <Label>Email</Label>
+          <Label htmlFor="first_name">First Name</Label>
           <Input
+            id="first_name"
+            value={data.first_name}
+            onChange={(e) => setData('first_name', e.target.value)}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="last_name">Last Name</Label>
+          <Input
+            id="last_name"
+            value={data.last_name}
+            onChange={(e) => setData('last_name', e.target.value)}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
             type="email"
             value={data.email}
             onChange={(e) => setData('email', e.target.value)}
@@ -57,8 +73,9 @@ export default function CreateUser({ roles }: CreateUserProps) {
         </div>
 
         <div>
-          <Label>Password</Label>
+          <Label htmlFor="password">Password</Label>
           <Input
+            id="password"
             type="password"
             value={data.password}
             onChange={(e) => setData('password', e.target.value)}
@@ -67,21 +84,26 @@ export default function CreateUser({ roles }: CreateUserProps) {
 
         <div>
           <Label>Role</Label>
-          <select
-            className="w-full border rounded px-3 py-2"
-            value={data.role_id}
-            onChange={(e) => setData('role_id', Number(e.target.value))}
+          <Select
+            value={data.role_id.toString()}
+            onValueChange={(value) => setData('role_id', Number(value))}
           >
-            <option value={0}>Select role</option>
-            {roleOptions.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select role" />
+            </SelectTrigger>
+            <SelectContent>
+              {roleOptions.map((role) => (
+                <SelectItem key={role.id} value={role.id.toString()}>
+                  {role.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <Button disabled={processing}>Create User</Button>
+        <Button type="submit" disabled={processing}>
+          Create User
+        </Button>
       </form>
     </>
   )
