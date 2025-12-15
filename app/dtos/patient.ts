@@ -54,6 +54,15 @@ export default class PatientDTO {
       dateOfBirth,
       gender: patient.gender,
       phone: patient.phone,
+      medicalRecordNumber: patient.medicalRecordNumber,
+      nationalIdType: patient.nationalIdType,
+      nationalIdNumber: patient.nationalIdNumber,
+      addressLine: patient.addressLine,
+      city: patient.city,
+      postalCode: patient.postalCode,
+      emergencyContactName: patient.emergencyContactName,
+      emergencyContactPhone: patient.emergencyContactPhone,
+      allergies: patient.allergies,
     }
   }
 
@@ -94,6 +103,15 @@ export default class PatientDTO {
       date_of_birth: patient.dateOfBirth ? patient.dateOfBirth.toISODate() : null,
       gender: patient.gender,
       phone: patient.phone,
+      medical_record_number: patient.medicalRecordNumber,
+      national_id_type: patient.nationalIdType,
+      national_id_number: patient.nationalIdNumber,
+      address_line: patient.addressLine,
+      city: patient.city,
+      postal_code: patient.postalCode,
+      emergency_contact_name: patient.emergencyContactName,
+      emergency_contact_phone: patient.emergencyContactPhone,
+      allergies: patient.allergies,
     }
   }
 

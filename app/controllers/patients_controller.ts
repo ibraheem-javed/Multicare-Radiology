@@ -33,11 +33,12 @@ export default class PatientsController {
     return inertia.render('patients/create')
   }
 
-  async store({ request, response }: HttpContext) {
+  async store({ request, response, session }: HttpContext) {
     const data = await request.validateUsing(patientValidator)
 
     await this.createPatient.handle(data)
 
+    session.flash('success', 'Patient created successfully')
     return response.redirect().toPath('/patients')
   }
 
