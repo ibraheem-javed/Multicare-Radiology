@@ -8,6 +8,8 @@ type Patient = {
   dateOfBirth?: string | null
   gender?: string | null
   phone?: string | null
+  medicalRecordNumber: string
+  city: string
 }
 
 export default function PatientsIndex() {
@@ -27,9 +29,11 @@ export default function PatientsIndex() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-left">
+              <th className="p-2">MRN</th>
               <th className="p-2">Name</th>
               <th className="p-2">DOB</th>
               <th className="p-2">Gender</th>
+              <th className="p-2">City</th>
               <th className="p-2">Phone</th>
               <th className="p-2"></th>
             </tr>
@@ -39,10 +43,14 @@ export default function PatientsIndex() {
             {patients.map((p) => (
               <tr key={p.id} className="border-t">
                 <td className="p-2">
+                  <span className="font-mono text-xs">{p.medicalRecordNumber}</span>
+                </td>
+                <td className="p-2">
                   {p.firstName} {p.lastName}
                 </td>
                 <td className="p-2">{p.dateOfBirth || '-'}</td>
                 <td className="p-2 capitalize">{p.gender || '-'}</td>
+                <td className="p-2">{p.city}</td>
                 <td className="p-2">{p.phone || '-'}</td>
                 <td className="p-2 text-right">
                   <Link href={`/patients/${p.id}`} className="text-blue-600 hover:underline">
