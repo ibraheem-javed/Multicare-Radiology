@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
 
 type Patient = {
-  id: number
+  id: string
   firstName: string
   lastName: string
   dateOfBirth?: string | null
@@ -12,7 +12,7 @@ type Patient = {
 
 export default function PatientShowPage() {
   const { patient } = usePage<{ patient: Patient }>().props
-  console.log(patient)
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -27,8 +27,7 @@ export default function PatientShowPage() {
 
       <div className="space-y-2 text-sm">
         <div>
-          <strong>DOB:</strong>{' '}
-          {patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : '-'}
+          <strong>DOB:</strong> {patient.dateOfBirth || '-'}
         </div>
         <div>
           <strong>Gender:</strong> {patient.gender || '-'}

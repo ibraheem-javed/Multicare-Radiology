@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
 
 type Patient = {
-  id: number
+  id: string
   firstName: string
   lastName: string
   dateOfBirth?: string | null

@@ -23,3 +23,15 @@ yarn-error.log
 
 # Platform specific
 .DS_Store
+
+# Claude Code - What to commit vs ignore
+# ⏸️ TEMPORARILY IGNORED: CLAUDE.md (team standards - ignore for now)
+# ❌ IGNORE: CLAUDE.local.md (personal preferences)
+# ❌ IGNORE: .claude/ folder (personal templates and setup guides)
+
+# Personal Claude settings and files (NOT committed to git)
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+.claude/settings.local.json
+.claude/rules/local/
