@@ -12,6 +12,14 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Card } from '~/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table'
 
 type AuditLog = {
   id: string
@@ -247,33 +255,32 @@ export default function AuditLogs() {
         </Card>
 
         {/* Audit Logs Table */}
-        <div className="border rounded-md overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-100 text-left">
-                <th className="p-2">Timestamp</th>
-                <th className="p-2">User</th>
-                <th className="p-2">Action</th>
-                <th className="p-2">Entity</th>
-                <th className="p-2">Entity ID</th>
-                <th className="p-2">IP Address</th>
-                <th className="p-2">Details</th>
-              </tr>
-            </thead>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Timestamp</TableHead>
+              <TableHead>User</TableHead>
+              <TableHead>Action</TableHead>
+              <TableHead>Entity</TableHead>
+              <TableHead>Entity ID</TableHead>
+              <TableHead>IP Address</TableHead>
+              <TableHead>Details</TableHead>
+            </TableRow>
+          </TableHeader>
 
-            <tbody>
-              {logs.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-4 text-center text-gray-500">
-                    No audit logs found
-                  </td>
-                </tr>
-              ) : (
-                logs.map((log) => (
+          <TableBody>
+            {logs.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-500">
+                  No audit logs found
+                </TableCell>
+              </TableRow>
+            ) : (
+              logs.map((log) => (
                   <>
-                    <tr key={log.id} className="border-t hover:bg-gray-50">
-                      <td className="p-2 text-xs">{formatDate(log.createdAt)}</td>
-                      <td className="p-2">
+                    <TableRow key={log.id}>
+                      <TableCell className="text-xs">{formatDate(log.createdAt)}</TableCell>
+                      <TableCell>
                         {log.user ? (
                           <div>
                             <div className="font-medium">
@@ -284,20 +291,20 @@ export default function AuditLogs() {
                         ) : (
                           <span className="text-gray-400">System</span>
                         )}
-                      </td>
-                      <td className="p-2">
+                      </TableCell>
+                      <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${getActionBadgeColor(log.action)}`}
                         >
                           {log.action}
                         </span>
-                      </td>
-                      <td className="p-2">{log.entityType}</td>
-                      <td className="p-2">
+                      </TableCell>
+                      <TableCell>{log.entityType}</TableCell>
+                      <TableCell>
                         <span className="font-mono text-xs">{log.entityId.slice(0, 8)}...</span>
-                      </td>
-                      <td className="p-2 text-xs">{log.ipAddress || '-'}</td>
-                      <td className="p-2">
+                      </TableCell>
+                      <TableCell className="text-xs">{log.ipAddress || '-'}</TableCell>
+                      <TableCell>
                         {log.changes && (
                           <button
                             onClick={() => toggleExpand(log.id)}
@@ -306,82 +313,82 @@ export default function AuditLogs() {
                             {expandedLogId === log.id ? 'Hide' : 'Show'} changes
                           </button>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
 
                     {expandedLogId === log.id && log.changes && (
-                      <tr className="border-t bg-gray-50">
-                        <td colSpan={7} className="p-4">
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-xs border-collapse">
-                              <thead>
-                                <tr className="bg-gray-100">
-                                  <th className="p-2 text-left border font-medium">Field</th>
-                                  {log.changes.old && (
-                                    <th className="p-2 text-left border font-medium">Before</th>
+                      <TableRow className="bg-muted">
+                        <TableCell colSpan={7} className="p-4">
+                          <div className="space-y-4">
+                            <Table className="text-xs">
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  {log.changes!.old && (
+                                    <TableHead>Before</TableHead>
                                   )}
-                                  {log.changes.new && (
-                                    <th className="p-2 text-left border font-medium">After</th>
+                                  {log.changes!.new && (
+                                    <TableHead>After</TableHead>
                                   )}
-                                </tr>
-                              </thead>
-                              <tbody>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
                                 {(() => {
-                                  const data = log.changes.old || log.changes.new || {}
+                                  const changes = log.changes!
+                                  const data = changes.old || changes.new || {}
                                   const fields = getOrderedFields(data, log.entityType)
 
                                   return fields.map((field) => {
                                     const changed = isFieldChanged(
                                       field,
-                                      log.changes.old,
-                                      log.changes.new
+                                      changes.old,
+                                      changes.new
                                     )
                                     const rowClass = changed
                                       ? 'bg-yellow-50'
-                                      : 'bg-white hover:bg-gray-50'
+                                      : ''
 
                                     return (
-                                      <tr key={field} className={rowClass}>
-                                        <td className="p-2 border font-medium text-gray-700">
+                                      <TableRow key={field} className={rowClass}>
+                                        <TableCell className="font-medium text-gray-700">
                                           {formatFieldName(field)}
-                                        </td>
-                                        {log.changes.old && (
-                                          <td className="p-2 border font-mono">
-                                            {formatFieldValue(log.changes.old[field])}
-                                          </td>
+                                        </TableCell>
+                                        {changes.old && (
+                                          <TableCell className="font-mono">
+                                            {formatFieldValue(changes.old[field])}
+                                          </TableCell>
                                         )}
-                                        {log.changes.new && (
-                                          <td
-                                            className={`p-2 border font-mono ${
+                                        {changes.new && (
+                                          <TableCell
+                                            className={`font-mono ${
                                               changed ? 'font-semibold text-blue-700' : ''
                                             }`}
                                           >
-                                            {formatFieldValue(log.changes.new[field])}
-                                          </td>
+                                            {formatFieldValue(changes.new[field])}
+                                          </TableCell>
                                         )}
-                                      </tr>
+                                      </TableRow>
                                     )
                                   })
                                 })()}
-                              </tbody>
-                            </table>
-                          </div>
+                              </TableBody>
+                            </Table>
 
-                          {log.userAgent && (
-                            <div className="mt-4">
-                              <h4 className="font-medium text-sm mb-1">User Agent:</h4>
-                              <p className="text-xs text-gray-600">{log.userAgent}</p>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
+                            {log.userAgent && (
+                              <div>
+                                <h4 className="font-medium text-sm mb-1">User Agent:</h4>
+                                <p className="text-xs text-gray-600">{log.userAgent}</p>
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     )}
                   </>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
+          </TableBody>
+        </Table>
 
         {/* Pagination */}
         {pagination.lastPage > 1 && (

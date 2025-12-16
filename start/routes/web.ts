@@ -91,7 +91,7 @@ router
       })
       .prefix('users') // now /users, /users/create, /users/:id, etc.
       .as('users')
-      .middleware([middleware.auth(), middleware.checkRole({ roles: [Roles.ADMIN] })])
+      .middleware([middleware.checkRole({ roles: [Roles.ADMIN] })])
 
     // Audit logs routes (Admin only)
     router
@@ -100,6 +100,6 @@ router
       })
       .prefix('audit-logs')
       .as('audit-logs')
-      .middleware([middleware.auth(), middleware.checkRole({ roles: [Roles.ADMIN] })])
+      .middleware([middleware.checkRole({ roles: [Roles.ADMIN] })])
   })
   .middleware([middleware.auth()])

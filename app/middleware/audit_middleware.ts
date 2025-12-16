@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-import LogAction from '#actions/audit/log_action'
+import LogAction from '#actions/audit/log'
 import { EntityType, AuditAction } from '#models/audit_log'
 
 /**

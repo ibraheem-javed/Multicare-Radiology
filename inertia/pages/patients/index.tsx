@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 
 type Patient = {
   id: string
@@ -25,43 +26,41 @@ export default function PatientsIndex() {
         </Link>
       </div>
 
-      <div className="border rounded-md">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-2">MRN</th>
-              <th className="p-2">Name</th>
-              <th className="p-2">DOB</th>
-              <th className="p-2">Gender</th>
-              <th className="p-2">City</th>
-              <th className="p-2">Phone</th>
-              <th className="p-2"></th>
-            </tr>
-          </thead>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>MRN</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>DOB</TableHead>
+            <TableHead>Gender</TableHead>
+            <TableHead>City</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
 
-          <tbody>
-            {patients.map((p) => (
-              <tr key={p.id} className="border-t">
-                <td className="p-2">
-                  <span className="font-mono text-xs">{p.medicalRecordNumber}</span>
-                </td>
-                <td className="p-2">
-                  {p.firstName} {p.lastName}
-                </td>
-                <td className="p-2">{p.dateOfBirth || '-'}</td>
-                <td className="p-2 capitalize">{p.gender || '-'}</td>
-                <td className="p-2">{p.city}</td>
-                <td className="p-2">{p.phone || '-'}</td>
-                <td className="p-2 text-right">
-                  <Link href={`/patients/${p.id}`} className="text-blue-600 hover:underline">
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        <TableBody>
+          {patients.map((p) => (
+            <TableRow key={p.id}>
+              <TableCell>
+                <span className="font-mono text-xs">{p.medicalRecordNumber}</span>
+              </TableCell>
+              <TableCell>
+                {p.firstName} {p.lastName}
+              </TableCell>
+              <TableCell>{p.dateOfBirth || '-'}</TableCell>
+              <TableCell className="capitalize">{p.gender || '-'}</TableCell>
+              <TableCell>{p.city}</TableCell>
+              <TableCell>{p.phone || '-'}</TableCell>
+              <TableCell className="text-right">
+                <Link href={`/patients/${p.id}`} className="text-blue-600 hover:underline">
+                  View
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }

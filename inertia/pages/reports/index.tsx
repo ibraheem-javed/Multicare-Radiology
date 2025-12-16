@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 
 type Report = {
   id: string
@@ -22,38 +23,36 @@ export default function ReportsIndex() {
         </Link>
       </div>
 
-      <div className="border rounded-md">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-2">Patient</th>
-              <th className="p-2">Radiologist</th>
-              <th className="p-2">Date</th>
-              <th className="p-2">Status</th>
-              <th className="p-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {reports.map((r) => (
-              <tr key={r.id} className="border-t">
-                <td className="p-2">
-                  {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
-                </td>
-                <td className="p-2">
-                  {r.radiologist ? `${r.radiologist.firstName} ${r.radiologist.lastName}` : '-'}
-                </td>
-                <td className="p-2">{r.reportDate}</td>
-                <td className="p-2 capitalize">{r.status}</td>
-                <td className="p-2 text-right">
-                  <Link href={`/reports/${r.id}`} className="text-blue-600 hover:underline">
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Patient</TableHead>
+            <TableHead>Radiologist</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {reports.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell>
+                {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
+              </TableCell>
+              <TableCell>
+                {r.radiologist ? `${r.radiologist.firstName} ${r.radiologist.lastName}` : '-'}
+              </TableCell>
+              <TableCell>{r.reportDate}</TableCell>
+              <TableCell className="capitalize">{r.status}</TableCell>
+              <TableCell className="text-right">
+                <Link href={`/reports/${r.id}`} className="text-blue-600 hover:underline">
+                  View
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }

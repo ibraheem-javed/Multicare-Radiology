@@ -1,5 +1,6 @@
 import { Link, Head, usePage } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 
 export default function UsersIndex() {
   const { users } = usePage<{ users: any[] }>().props
@@ -15,32 +16,32 @@ export default function UsersIndex() {
         </Link>
       </div>
 
-      <table className="w-full border text-sm">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="p-2">Name</th>
-            <th className="p-2">Email</th>
-            <th className="p-2">Role</th>
-            <th className="p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {users.map((u) => (
-            <tr key={u.id} className="border-t">
-              <td className="p-2">
+            <TableRow key={u.id}>
+              <TableCell>
                 {u.firstName} {u.lastName}
-              </td>
-              <td className="p-2">{u.email}</td>
-              <td className="p-2">{u.role?.name}</td>
-              <td className="p-2 space-x-2">
+              </TableCell>
+              <TableCell>{u.email}</TableCell>
+              <TableCell>{u.role?.name}</TableCell>
+              <TableCell className="space-x-2">
                 <Link href={`/users/${u.id}`} className="text-blue-600">
                   View
                 </Link>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </>
   )
 }

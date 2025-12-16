@@ -1,6 +1,6 @@
 import Request from '#models/request'
 import type { HttpContext } from '@adonisjs/core/http'
-import LogAction from '#actions/audit/log_action'
+import LogAction from '#actions/audit/log'
 import { EntityType } from '#models/audit_log'
 
 export default class DeleteRequest {
