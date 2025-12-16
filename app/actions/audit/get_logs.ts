@@ -1,8 +1,6 @@
-import { inject } from '@adonisjs/core'
-import type { HttpContext } from '@adonisjs/core/http'
 import AuditLog from '#models/audit_log'
 
-type GetAuditLogsParams = {
+type GetLogsParams = {
   page: number
   perPage: number
   entityType?: string
@@ -13,11 +11,8 @@ type GetAuditLogsParams = {
   endDate?: string
 }
 
-@inject()
-export default class GetAuditLogs {
-  constructor(protected ctx: HttpContext) {}
-
-  async handle(params: GetAuditLogsParams) {
+export default class GetLogs {
+  async handle(params: GetLogsParams) {
     const { page, perPage, entityType, action, userId, entityId, startDate, endDate } = params
 
     // Build query with filters
