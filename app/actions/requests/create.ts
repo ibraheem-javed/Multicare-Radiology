@@ -1,9 +1,20 @@
 import Request from '#models/request'
 import { RequestStatus } from '#enums/request_status'
 import { DateTime } from 'luxon'
+import type { HttpContext } from '@adonisjs/core/http'
+import LogAction from '#actions/audit/log_action'
+import { EntityType } from '#models/audit_log'
 
 export default class CreateRequest {
-  async handle(data: {
+  /**
+   * Create a new radiology request
+   * Used in: RequestsController.store()
+   *
+   * Includes audit logging for compliance
+   */
+  async handle(
+    ctx: HttpContext,
+    data: {
     patient_id: string
     procedure_type: string
     requested_by: string
@@ -25,6 +36,18 @@ export default class CreateRequest {
       requestDate: DateTime.fromJSDate(requestDate),
       status,
     })
+
+    // Log request creation for audit trail
+    if (ctx.auth.user) {
+      const logAction = new LogAction(ctx)
+      await logAction.logCreated(
+        ctx.auth.user.id,
+        EntityType.REQUEST,
+        request.id,
+        request.toJSON()
+      )
+    }
+
     return request
   }
 }

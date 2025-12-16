@@ -24,8 +24,9 @@ export default class RequestsController {
     return inertia.render('requests/index', { requests })
   }
 
-  async show({ params, inertia }: HttpContext) {
-    const request = await this.getRequest.handleForShow(params.id)
+  async show(ctx: HttpContext) {
+    const { params, inertia } = ctx
+    const request = await this.getRequest.handleForShow(ctx, params.id)
     return inertia.render('requests/show', { request })
   }
 
@@ -34,9 +35,10 @@ export default class RequestsController {
     return inertia.render('requests/create', { patients, users })
   }
 
-  async store({ request, response }: HttpContext) {
+  async store(ctx: HttpContext) {
+    const { request, response } = ctx
     const data = await request.validateUsing(requestValidator)
-    await this.createRequest.handle(data)
+    await this.createRequest.handle(ctx, data)
     return response.redirect().toPath('/requests')
   }
 
@@ -50,14 +52,16 @@ export default class RequestsController {
     })
   }
 
-  async update({ params, request, response }: HttpContext) {
+  async update(ctx: HttpContext) {
+    const { params, request, response } = ctx
     const data = await request.validateUsing(requestValidator)
-    await this.updateRequest.handle(params.id, data)
+    await this.updateRequest.handle(ctx, params.id, data)
     return response.redirect().toPath(`/requests/${params.id}`)
   }
 
-  async destroy({ params, response }: HttpContext) {
-    await this.deleteRequest.handle(params.id)
+  async destroy(ctx: HttpContext) {
+    const { params, response } = ctx
+    await this.deleteRequest.handle(ctx, params.id)
     return response.redirect().toPath('/requests')
   }
 }

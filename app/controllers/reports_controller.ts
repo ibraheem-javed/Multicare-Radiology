@@ -29,14 +29,16 @@ export default class ReportsController {
     return inertia.render('reports/create', { requests, radiologists })
   }
 
-  async store({ request, response }: HttpContext) {
+  async store(ctx: HttpContext) {
+    const { request, response } = ctx
     const data = await request.validateUsing(reportValidator)
-    await this.createReport.handle(data)
+    await this.createReport.handle(ctx, data)
     return response.redirect().toPath('/reports')
   }
 
-  async show({ params, inertia }: HttpContext) {
-    const report = await this.getReport.handleForShow(params.id)
+  async show(ctx: HttpContext) {
+    const { params, inertia } = ctx
+    const report = await this.getReport.handleForShow(ctx, params.id)
     return inertia.render('reports/show', { report })
   }
 
@@ -46,14 +48,16 @@ export default class ReportsController {
     return inertia.render('reports/edit', { report, radiologists })
   }
 
-  async update({ params, request, response }: HttpContext) {
+  async update(ctx: HttpContext) {
+    const { params, request, response } = ctx
     const data = await request.validateUsing(updateReportValidator)
-    await this.updateReport.handle(params.id, data)
+    await this.updateReport.handle(ctx, params.id, data)
     return response.redirect().toPath(`/reports/${params.id}`)
   }
 
-  async destroy({ params, response }: HttpContext) {
-    await this.deleteReport.handle(params.id)
+  async destroy(ctx: HttpContext) {
+    const { params, response } = ctx
+    await this.deleteReport.handle(ctx, params.id)
     return response.redirect().toPath('/reports')
   }
 }

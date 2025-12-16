@@ -6,6 +6,7 @@ const PatientsController = () => import('#controllers/patients_controller')
 const RequestsController = () => import('#controllers/requests_controller')
 const ReportsController = () => import('#controllers/reports_controller')
 const UsersController = () => import('#controllers/users_controller')
+const AuditLogsController = () => import('#controllers/audit_logs_controller')
 
 router
   .group(() => {
@@ -90,6 +91,15 @@ router
       })
       .prefix('users') // now /users, /users/create, /users/:id, etc.
       .as('users')
+      .middleware([middleware.auth(), middleware.checkRole({ roles: [Roles.ADMIN] })])
+
+    // Audit logs routes (Admin only)
+    router
+      .group(() => {
+        router.get('/', [AuditLogsController, 'index']).as('audit-logs.index')
+      })
+      .prefix('audit-logs')
+      .as('audit-logs')
       .middleware([middleware.auth(), middleware.checkRole({ roles: [Roles.ADMIN] })])
   })
   .middleware([middleware.auth()])
