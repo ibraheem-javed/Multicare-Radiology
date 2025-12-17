@@ -22,8 +22,9 @@ export default class PatientsController {
     return inertia.render('patients/index', { patients })
   }
 
-  async show({ params, inertia }: HttpContext) {
-    const patient = await this.getPatient.handle(params.id)
+  async show(ctx: HttpContext) {
+    const { params, inertia } = ctx
+    const patient = await this.getPatient.handle(ctx, params.id)
     return inertia.render('patients/show', { patient })
   }
 
@@ -31,27 +32,31 @@ export default class PatientsController {
     return inertia.render('patients/create')
   }
 
-  async store({ request, response, session }: HttpContext) {
+  async store(ctx: HttpContext) {
+    const { request, response, session } = ctx
     const data = await request.validateUsing(patientValidator)
-    await this.createPatient.handle(data)
+    await this.createPatient.handle(ctx, data)
 
     session.flash('success', 'Patient created successfully')
     return response.redirect().toPath('/patients')
   }
 
-  async showEditForm({ params, inertia }: HttpContext) {
-    const patient = await this.getPatient.handle(params.id)
+  async showEditForm(ctx: HttpContext) {
+    const { params, inertia } = ctx
+    const patient = await this.getPatient.handle(ctx, params.id)
     return inertia.render('patients/edit', { patient })
   }
 
-  async update({ params, request, response }: HttpContext) {
+  async update(ctx: HttpContext) {
+    const { params, request, response } = ctx
     const data = await request.validateUsing(patientValidator)
-    await this.updatePatient.handle(params.id, data)
+    await this.updatePatient.handle(ctx, params.id, data)
     return response.redirect().toPath(`/patients/${params.id}`)
   }
 
-  async destroy({ params, response }: HttpContext) {
-    await this.deletePatient.handle(params.id)
+  async destroy(ctx: HttpContext) {
+    const { params, response } = ctx
+    await this.deletePatient.handle(ctx, params.id)
     return response.redirect().toPath('/patients')
   }
 }

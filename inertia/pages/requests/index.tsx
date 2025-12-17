@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 
 interface Patient {
   id: string
@@ -34,40 +35,38 @@ export default function RequestsIndex() {
         </Link>
       </div>
 
-      <div className="border rounded-md">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-2">Patient</th>
-              <th className="p-2">Procedure</th>
-              <th className="p-2">Requested By</th>
-              <th className="p-2">Date</th>
-              <th className="p-2">Status</th>
-              <th className="p-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((r) => (
-              <tr key={r.id} className="border-t">
-                <td className="p-2">
-                  {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
-                </td>
-                <td className="p-2">{r.procedureType}</td>
-                <td className="p-2">
-                  {r.requestedBy ? `${r.requestedBy.firstName} ${r.requestedBy.lastName}` : '-'}
-                </td>
-                <td className="p-2">{r.requestDate}</td>
-                <td className="p-2 capitalize">{r.status}</td>
-                <td className="p-2 text-right">
-                  <Link href={`/requests/${r.id}`} className="text-blue-600 hover:underline">
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Patient</TableHead>
+            <TableHead>Procedure</TableHead>
+            <TableHead>Requested By</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {requests.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell>
+                {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
+              </TableCell>
+              <TableCell>{r.procedureType}</TableCell>
+              <TableCell>
+                {r.requestedBy ? `${r.requestedBy.firstName} ${r.requestedBy.lastName}` : '-'}
+              </TableCell>
+              <TableCell>{r.requestDate}</TableCell>
+              <TableCell className="capitalize">{r.status}</TableCell>
+              <TableCell className="text-right">
+                <Link href={`/requests/${r.id}`} className="text-blue-600 hover:underline">
+                  View
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }

@@ -1,4 +1,7 @@
 import Patient from '#models/patient'
+import type { HttpContext } from '@adonisjs/core/http'
+import LogAction from '#actions/audit/log'
+import { EntityType } from '#models/audit_log'
 
 export default class UpdatePatient {
   /**
@@ -7,12 +10,10 @@ export default class UpdatePatient {
    *
    * Note: medical_record_number is immutable and cannot be changed after creation
    *
-   * Future: Can add logic for:
-   * - Notifying patient of changes
-   * - Logging updates for audit trail
-   * - Validating changes against existing appointments
+   * Now includes audit logging for compliance
    */
   async handle(
+    ctx: HttpContext,
     id: string,
     data: {
       first_name: string
@@ -32,11 +33,27 @@ export default class UpdatePatient {
   ) {
     const patient = await Patient.findOrFail(id)
 
+    // Capture old data for audit trail
+    const oldData = patient.toJSON()
+
     // Remove medical_record_number if it exists in data (immutable field)
     const { ...updateData } = data
 
     patient.merge(updateData)
     await patient.save()
+
+    // Log patient update for audit trail
+    if (ctx.auth.user) {
+      const logAction = new LogAction(ctx)
+      await logAction.logUpdated(
+        ctx.auth.user.id,
+        EntityType.PATIENT,
+        patient.id,
+        oldData,
+        patient.toJSON()
+      )
+    }
+
     return patient
   }
 }

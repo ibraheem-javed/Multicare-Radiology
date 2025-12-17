@@ -1,5 +1,8 @@
 import Patient from '#models/patient'
 import { DateTime } from 'luxon'
+import type { HttpContext } from '@adonisjs/core/http'
+import LogAction from '#actions/audit/log'
+import { EntityType } from '#models/audit_log'
 
 export default class CreatePatient {
   /**
@@ -9,12 +12,11 @@ export default class CreatePatient {
    * Generates unique Medical Record Number (MRN) in format: MRN-YYYYMMDD-####
    * Example: MRN-20250115-0001
    *
-   * Future: Can add logic for:
-   * - Sending welcome notifications
-   * - Creating patient portal account
-   * - Logging patient creation for audit
+   * Now includes audit logging for compliance
    */
-  async handle(data: {
+  async handle(
+    ctx: HttpContext,
+    data: {
     first_name: string
     last_name: string
     date_of_birth?: string | null
@@ -41,6 +43,17 @@ export default class CreatePatient {
     }
 
     const patient = await Patient.create(data)
+
+    // Log patient creation for audit trail
+    if (ctx.auth.user) {
+      const logAction = new LogAction(ctx)
+      await logAction.logCreated(
+        ctx.auth.user.id,
+        EntityType.PATIENT,
+        patient.id,
+        patient.toJSON()
+      )
+    }
 
     // Future: Add notification logic here
     // await sendWelcomeEmail(patient)

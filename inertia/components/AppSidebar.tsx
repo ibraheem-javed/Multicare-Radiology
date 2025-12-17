@@ -1,4 +1,4 @@
-import { Home, Inbox, Search, Settings, Hospital, FileUp } from 'lucide-react'
+import { Home, Inbox, Search, Settings, Hospital, FileUp, Shield } from 'lucide-react'
 import { Link } from '@inertiajs/react'
 
 import {
@@ -41,7 +41,13 @@ const items = [
     title: 'Users',
     url: '/users',
     icon: Search,
-    internal: false, // placeholder
+    internal: true,
+  },
+  {
+    title: 'Audit Logs',
+    url: '/audit-logs',
+    icon: Shield,
+    internal: true,
   },
 ]
 
