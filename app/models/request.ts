@@ -1,7 +1,7 @@
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import Patient from './patient.js'
-import User from './user.js'
+import Requester from './requester.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { RequestStatus } from '#enums/request_status'
 
@@ -15,8 +15,8 @@ export default class Request extends BaseModel {
   @column({ columnName: 'procedure_type' })
   declare procedureType: string
 
-  @column({ columnName: 'requested_by' })
-  declare requestedById: string
+  @column({ columnName: 'requester_id' })
+  declare requesterId: string
 
   @column.date({ columnName: 'request_date' })
   declare requestDate: DateTime
@@ -30,10 +30,9 @@ export default class Request extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  // Relationships
   @belongsTo(() => Patient, { foreignKey: 'patientId' })
   declare patient: BelongsTo<typeof Patient>
 
-  @belongsTo(() => User, { foreignKey: 'requestedById' })
-  declare requestedBy: BelongsTo<typeof User>
+  @belongsTo(() => Requester, { foreignKey: 'requesterId' })
+  declare requester: BelongsTo<typeof Requester>
 }

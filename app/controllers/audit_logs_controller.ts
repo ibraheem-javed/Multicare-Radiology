@@ -6,10 +6,6 @@ import GetLogs from '#actions/audit/get_logs'
 export default class AuditLogsController {
   constructor(protected getAuditLogs: GetLogs) {}
 
-  /**
-   * Display a list of audit logs with optional filters
-   * GET /audit-logs
-   */
   async index({ request, inertia }: HttpContext) {
     const page = request.input('page', 1)
     const perPage = 50

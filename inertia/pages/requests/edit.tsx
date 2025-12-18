@@ -16,36 +16,39 @@ type Patient = {
   lastName: string
 }
 
-type User = {
+type Requester = {
   id: string
-  firstName: string
-  lastName: string
+  name: string
+  additionalInformation?: string | null
 }
 
 type Request = {
   id: string
-  patient_id: string
-  procedure_type: string
-  requested_by: string
-  request_date: string
+  patientId: string
+  procedureType: string
+  requesterId: string
+  requesterAdditionalInformation?: string | null
+  requestDate: string
   status: string
 }
 
 export default function RequestEditPage() {
-  const { request, patients, users } = usePage<{
+  const { request, patients, requesters } = usePage<{
     request: Request
     patients: Patient[]
-    users: User[]
+    requesters: Requester[]
   }>().props
 
   const { data, setData, put, errors, processing } = useForm({
-    patient_id: request.patient_id,
-    procedure_type: request.procedure_type,
-    requested_by: request.requested_by,
-    request_date: request.request_date,
+    patientId: request.patientId,
+    procedureType: request.procedureType,
+    requesterId: request.requesterId,
+    requesterAdditionalInformation: request.requesterAdditionalInformation ?? '',
+    requestDate: request.requestDate,
     status: request.status,
   })
 
+  console.log(request)
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     put(`/requests/${request.id}`)
@@ -59,7 +62,7 @@ export default function RequestEditPage() {
         {/* Patient */}
         <div className="space-y-2">
           <Label>Patient</Label>
-          <Select value={data.patient_id} onValueChange={(value) => setData('patient_id', value)}>
+          <Select value={data.patientId} onValueChange={(value) => setData('patientId', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select Patient" />
             </SelectTrigger>
@@ -77,29 +80,52 @@ export default function RequestEditPage() {
         <div className="space-y-2">
           <Label>Procedure Type</Label>
           <Input
-            value={data.procedure_type}
-            onChange={(e) => setData('procedure_type', e.target.value)}
+            value={data.procedureType}
+            onChange={(e) => setData('procedureType', e.target.value)}
+            aria-errormessage={errors?.procedureType}
           />
         </div>
 
-        {/* Requested By */}
+        {/* Requester */}
         <div className="space-y-2">
           <Label>Requested By</Label>
           <Select
-            value={data.requested_by}
-            onValueChange={(value) => setData('requested_by', value)}
+            value={data.requesterId}
+            onValueChange={(value) => {
+              setData('requesterId', value)
+
+              // Find the selected requester from the requesters array
+              const selectedRequester = requesters.find((r) => r.id === value)
+
+              // Update the additional info field accordingly
+              setData(
+                'requesterAdditionalInformation',
+                selectedRequester?.additionalInformation ?? ''
+              )
+            }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select User" />
+              <SelectValue placeholder="Select Requester" />
             </SelectTrigger>
             <SelectContent>
-              {users.map((u) => (
-                <SelectItem key={u.id} value={u.id}>
-                  {u.firstName} {u.lastName}
+              {requesters.map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {r.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Additional Information */}
+        <div className="space-y-2">
+          <Label>Additional Requester Information</Label>
+          <Input
+            value={data.requesterAdditionalInformation}
+            onChange={(e) => setData('requesterAdditionalInformation', e.target.value)}
+            placeholder="Optional info"
+            aria-errormessage={errors?.requesterAdditionalInformation}
+          />
         </div>
 
         {/* Request Date */}
@@ -107,8 +133,9 @@ export default function RequestEditPage() {
           <Label>Request Date</Label>
           <Input
             type="date"
-            value={data.request_date}
-            onChange={(e) => setData('request_date', e.target.value)}
+            value={data.requestDate}
+            onChange={(e) => setData('requestDate', e.target.value)}
+            aria-errormessage={errors?.requesterAdditionalInformation}
           />
         </div>
 

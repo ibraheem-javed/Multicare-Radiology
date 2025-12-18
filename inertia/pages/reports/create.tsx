@@ -21,10 +21,10 @@ type ReportCreatePageProps = {
 export default function ReportCreatePage() {
   const { requests, radiologists } = usePage<ReportCreatePageProps>().props
 
-  const { data, setData, post, processing } = useForm({
-    request_id: '',
-    radiologist_id: '',
-    report_date: new Date().toISOString().slice(0, 10),
+  const { data, setData, post, processing, errors } = useForm({
+    requestId: '',
+    radiologistId: '',
+    reportDate: new Date().toISOString().slice(0, 10),
     status: 'draft',
     findings: '',
     impression: '',
@@ -64,8 +64,8 @@ export default function ReportCreatePage() {
             <Label>Request</Label>
             <select
               className="w-full border rounded px-2 py-1"
-              value={data.request_id}
-              onChange={(e) => setData('request_id', e.target.value)}
+              value={data.requestId}
+              onChange={(e) => setData('requestId', e.target.value)}
             >
               <option value="">Select request</option>
               {requests.map((r: any) => (
@@ -80,8 +80,8 @@ export default function ReportCreatePage() {
             <Label>Radiologist</Label>
             <select
               className="w-full border rounded px-2 py-1"
-              value={data.radiologist_id}
-              onChange={(e) => setData('radiologist_id', e.target.value)}
+              value={data.radiologistId}
+              onChange={(e) => setData('radiologistId', e.target.value)}
             >
               <option value="">Select radiologist</option>
               {radiologists.map((r: any) => (
@@ -96,8 +96,9 @@ export default function ReportCreatePage() {
             <Label>Report Date</Label>
             <Input
               type="date"
-              value={data.report_date}
-              onChange={(e) => setData('report_date', e.target.value)}
+              value={data.reportDate}
+              onChange={(e) => setData('reportDate', e.target.value)}
+              aria-errormessage={errors?.reportDate}
             />
           </div>
 

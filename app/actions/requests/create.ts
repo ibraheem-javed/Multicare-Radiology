@@ -1,51 +1,60 @@
 import Request from '#models/request'
+import Requester from '#models/requester'
 import { RequestStatus } from '#enums/request_status'
 import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 import LogAction from '#actions/audit/log'
-import { EntityType } from '#models/audit_log'
+import { EntityType } from '#enums/entity_type'
 
 export default class CreateRequest {
-  /**
-   * Create a new radiology request
-   * Used in: RequestsController.store()
-   *
-   * Includes audit logging for compliance
-   */
   async handle(
     ctx: HttpContext,
     data: {
-    patient_id: string
-    procedure_type: string
-    requested_by: string
-    request_date: Date
-    status: RequestStatus
-  }) {
-    const {
-      patient_id: patientId,
-      procedure_type: procedureType,
-      requested_by: requestedBy,
-      request_date: requestDate,
-      status,
-    } = data
+      patientId: string
+      procedureType: string
+      requesterId?: string
+      requesterName?: string
+      requesterAdditionalInformation?: string | null
+      requestDate: string | Date
+      status: RequestStatus
+    }
+  ) {
+    let requesterId: string
+
+    if (data.requesterId) {
+      requesterId = data.requesterId
+    } else if (data.requesterName) {
+      let requester = await Requester.query().where('name', data.requesterName).first()
+
+      if (!requester) {
+        requester = await Requester.create({
+          name: data.requesterName,
+          additionalInformation: data.requesterAdditionalInformation ?? null,
+        })
+      } else if (data.requesterAdditionalInformation) {
+        requester.additionalInformation = data.requesterAdditionalInformation
+        await requester.save()
+      }
+
+      requesterId = requester.id
+    } else {
+      throw new Error('Requester name or id must be provided')
+    }
 
     const request = await Request.create({
-      patientId,
-      procedureType,
-      requestedById: requestedBy,
-      requestDate: DateTime.fromJSDate(requestDate),
-      status,
+      patientId: data.patientId,
+      procedureType: data.procedureType,
+      requesterId,
+      requestDate:
+        typeof data.requestDate === 'string'
+          ? DateTime.fromISO(data.requestDate)
+          : DateTime.fromJSDate(data.requestDate),
+      status: data.status,
     })
 
-    // Log request creation for audit trail
     if (ctx.auth.user) {
       const logAction = new LogAction(ctx)
-      await logAction.logCreated(
-        ctx.auth.user.id,
-        EntityType.REQUEST,
-        request.id,
-        request.toJSON()
-      )
+      await logAction.logCreated(ctx.auth.user.id, EntityType.REQUEST, request.id, request.toJSON())
     }
 
     return request

@@ -7,6 +7,7 @@ type Patient = {
   lastName: string
   dateOfBirth?: string | null
   gender?: string | null
+  age: string
   phone?: string | null
   medicalRecordNumber: string
   nationalIdType: string
@@ -45,6 +46,9 @@ export default function PatientShowPage() {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <strong>Date of Birth:</strong> {patient.dateOfBirth || '-'}
+          </div>
+          <div>
+            <strong>Age:</strong> {patient.age || '-'}
           </div>
           <div>
             <strong>Gender:</strong> {patient.gender || '-'}
@@ -103,7 +107,7 @@ export default function PatientShowPage() {
       <div className="space-y-4">
         <h2 className="text-lg font-medium border-b pb-2">Medical Information</h2>
         <div className="text-sm">
-          <strong>Known Allergies:</strong>
+          <strong>Known Allergies & Medical Conditions:</strong>
           <p className="mt-1 text-gray-700 whitespace-pre-wrap">
             {patient.allergies || 'No known allergies'}
           </p>

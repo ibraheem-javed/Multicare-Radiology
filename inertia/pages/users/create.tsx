@@ -17,11 +17,11 @@ type CreateUserProps = {
 
 export default function CreateUser({ roles }: CreateUserProps) {
   const { data, setData, post, processing, errors } = useForm({
-    first_name: '',
-    last_name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
-    role_id: 0, // numeric type for enum
+    roleId: 0, // numeric type for enum
   })
 
   const roleOptions = [
@@ -45,20 +45,22 @@ export default function CreateUser({ roles }: CreateUserProps) {
 
       <form onSubmit={submit} className="space-y-4 max-w-md">
         <div>
-          <Label htmlFor="first_name">First Name</Label>
+          <Label htmlFor="firstNname">First Name</Label>
           <Input
-            id="first_name"
-            value={data.first_name}
-            onChange={(e) => setData('first_name', e.target.value)}
+            id="firstNname"
+            value={data.firstName}
+            onChange={(e) => setData('firstName', e.target.value)}
+            aria-errormessage={errors?.firstName}
           />
         </div>
 
         <div>
-          <Label htmlFor="last_name">Last Name</Label>
+          <Label htmlFor="lastName">Last Name</Label>
           <Input
-            id="last_name"
-            value={data.last_name}
-            onChange={(e) => setData('last_name', e.target.value)}
+            id="lastName"
+            value={data.lastName}
+            onChange={(e) => setData('lastName', e.target.value)}
+            aria-errormessage={errors?.lastName}
           />
         </div>
 
@@ -69,6 +71,7 @@ export default function CreateUser({ roles }: CreateUserProps) {
             type="email"
             value={data.email}
             onChange={(e) => setData('email', e.target.value)}
+            aria-errormessage={errors?.email}
           />
         </div>
 
@@ -79,14 +82,15 @@ export default function CreateUser({ roles }: CreateUserProps) {
             type="password"
             value={data.password}
             onChange={(e) => setData('password', e.target.value)}
+            aria-errormessage={errors?.password}
           />
         </div>
 
         <div>
           <Label>Role</Label>
           <Select
-            value={data.role_id.toString()}
-            onValueChange={(value) => setData('role_id', Number(value))}
+            value={data.roleId.toString()}
+            onValueChange={(value) => setData('roleId', Number(value))}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select role" />

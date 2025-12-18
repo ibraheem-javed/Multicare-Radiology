@@ -10,13 +10,12 @@ export default class extends BaseSchema {
       table.uuid('request_id').references('requests.id').onDelete('CASCADE').notNullable()
       table.uuid('patient_id').references('patients.id').onDelete('CASCADE').notNullable()
       table.uuid('radiologist_id').references('users.id').onDelete('SET NULL').nullable()
-
       table.text('findings').notNullable()
       table.text('impression').nullable()
-      table.string('status').notNullable().defaultTo('draft') // draft/final
+      table.string('status').notNullable().defaultTo('draft')
       table.date('report_date').notNullable()
-
-      table.timestamps()
+      table.timestamp('created_at').notNullable()
+      table.timestamp('updated_at').nullable()
     })
   }
 

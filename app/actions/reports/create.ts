@@ -4,47 +4,35 @@ import Request from '#models/request'
 import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 import LogAction from '#actions/audit/log'
-import { EntityType } from '#models/audit_log'
+import { EntityType } from '#enums/entity_type'
 
 export default class CreateReport {
-  /**
-   * Create a new radiology report
-   * Used in: ReportsController.store()
-   *
-   * Includes audit logging for compliance
-   */
   async handle(
     ctx: HttpContext,
     data: {
-    request_id: string
-    radiologist_id: string | null
-    findings: string
-    impression: string | null
-    status: ReportStatus
-    report_date: Date
-  }) {
-    // Fetch the request to get patient ID
-    const request = await Request.findOrFail(data.request_id)
+      requestId: string
+      radiologistId: string | null
+      findings: string
+      impression: string | null
+      status: ReportStatus
+      reportDate: Date
+    }
+  ) {
+    const request = await Request.findOrFail(data.requestId)
 
     const report = await Report.create({
-      requestId: data.request_id,
+      requestId: data.requestId,
       patientId: request.patientId,
-      radiologistId: data.radiologist_id,
+      radiologistId: data.radiologistId,
       findings: data.findings,
       impression: data.impression,
       status: data.status,
-      reportDate: DateTime.fromJSDate(data.report_date),
+      reportDate: DateTime.fromJSDate(data.reportDate),
     })
 
-    // Log report creation for audit trail
     if (ctx.auth.user) {
       const logAction = new LogAction(ctx)
-      await logAction.logCreated(
-        ctx.auth.user.id,
-        EntityType.REPORT,
-        report.id,
-        report.toJSON()
-      )
+      await logAction.logCreated(ctx.auth.user.id, EntityType.REPORT, report.id, report.toJSON())
     }
 
     return report

@@ -17,6 +17,7 @@ type Patient = {
   lastName: string
   dateOfBirth?: string | null
   gender?: string | null
+  age: string
   phone?: string | null
   medicalRecordNumber: string
   nationalIdType: string
@@ -58,18 +59,19 @@ export default function PatientEditPage() {
   }
 
   const { data, setData, put, errors, processing } = useForm({
-    first_name: patient.firstName,
-    last_name: patient.lastName,
-    date_of_birth: convertFormattedDateToISO(patient.dateOfBirth),
+    firstName: patient.firstName,
+    lastName: patient.lastName,
+    dateOfBirth: convertFormattedDateToISO(patient.dateOfBirth),
     gender: patient.gender || '',
+    age: patient.age,
     phone: patient.phone || '',
-    national_id_type: patient.nationalIdType,
-    national_id_number: patient.nationalIdNumber || '',
-    address_line: patient.addressLine,
+    nationalIdType: patient.nationalIdType,
+    nationalIdNumber: patient.nationalIdNumber || '',
+    addressLine: patient.addressLine,
     city: patient.city,
-    postal_code: patient.postalCode || '',
-    emergency_contact_name: patient.emergencyContactName,
-    emergency_contact_phone: patient.emergencyContactPhone,
+    postalCode: patient.postalCode || '',
+    emergencyContactName: patient.emergencyContactName,
+    emergencyContactPhone: patient.emergencyContactPhone,
     allergies: patient.allergies || '',
   })
 
@@ -96,42 +98,61 @@ export default function PatientEditPage() {
             <div className="space-y-2">
               <Label>First Name *</Label>
               <Input
-                value={data.first_name}
-                onChange={(e) => setData('first_name', e.target.value)}
+                value={data.firstName}
+                onChange={(e) => setData('firstName', e.target.value)}
+                aria-errormessage={errors?.firstName}
               />
             </div>
 
             <div className="space-y-2">
               <Label>Last Name *</Label>
               <Input
-                value={data.last_name}
-                onChange={(e) => setData('last_name', e.target.value)}
+                value={data.lastName}
+                onChange={(e) => setData('lastName', e.target.value)}
+                aria-errormessage={errors?.lastName}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Date of Birth</Label>
-              <Input
-                type="date"
-                value={data.date_of_birth}
-                onChange={(e) => setData('date_of_birth', e.target.value)}
-              />
-            </div>
-
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Gender</Label>
               <Input
                 placeholder="male / female / other"
                 value={data.gender}
                 onChange={(e) => setData('gender', e.target.value)}
+                aria-errormessage={errors?.gender}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Age *</Label>
+              <Input
+                value={data.age}
+                onChange={(e) => setData('age', e.target.value)}
+                aria-errormessage={errors?.age}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Date of Birth</Label>
+              <Input
+                type="date"
+                value={data.dateOfBirth}
+                onChange={(e) => setData('dateOfBirth', e.target.value)}
+                aria-errormessage={errors?.dateOfBirth}
               />
             </div>
 
             <div className="space-y-2">
               <Label>Phone</Label>
-              <Input value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
+              <Input
+                value={data.phone}
+                onChange={(e) => setData('phone', e.target.value)}
+                aria-errormessage={errors?.phone}
+              />
             </div>
           </div>
         </div>
@@ -144,8 +165,8 @@ export default function PatientEditPage() {
             <div className="space-y-2">
               <Label>National ID Type</Label>
               <Select
-                value={data.national_id_type}
-                onValueChange={(value) => setData('national_id_type', value)}
+                value={data.nationalIdType}
+                onValueChange={(value) => setData('nationalIdType', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select ID Type" />
@@ -164,8 +185,9 @@ export default function PatientEditPage() {
               <Label>National ID Number</Label>
               <Input
                 placeholder="e.g., 12345-1234567-1"
-                value={data.national_id_number}
-                onChange={(e) => setData('national_id_number', e.target.value)}
+                value={data.nationalIdNumber}
+                onChange={(e) => setData('nationalIdNumber', e.target.value)}
+                aria-errormessage={errors?.nationalIdNumber}
               />
             </div>
           </div>
@@ -179,23 +201,29 @@ export default function PatientEditPage() {
             <Label>Address Line *</Label>
             <Input
               placeholder="Street address"
-              value={data.address_line}
-              onChange={(e) => setData('address_line', e.target.value)}
+              value={data.addressLine}
+              onChange={(e) => setData('addressLine', e.target.value)}
+              aria-errormessage={errors?.addressLine}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>City *</Label>
-              <Input value={data.city} onChange={(e) => setData('city', e.target.value)} />
+              <Input
+                value={data.city}
+                onChange={(e) => setData('city', e.target.value)}
+                aria-errormessage={errors?.city}
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Postal Code</Label>
               <Input
                 placeholder="e.g., 54000"
-                value={data.postal_code}
-                onChange={(e) => setData('postal_code', e.target.value)}
+                value={data.postalCode}
+                onChange={(e) => setData('postalCode', e.target.value)}
+                aria-errormessage={errors?.postalCode}
               />
             </div>
           </div>
@@ -210,8 +238,9 @@ export default function PatientEditPage() {
               <Label>Contact Name *</Label>
               <Input
                 placeholder="Full name"
-                value={data.emergency_contact_name}
-                onChange={(e) => setData('emergency_contact_name', e.target.value)}
+                value={data.emergencyContactName}
+                onChange={(e) => setData('emergencyContactName', e.target.value)}
+                aria-errormessage={errors?.emergencyContactName}
               />
             </div>
 
@@ -219,8 +248,9 @@ export default function PatientEditPage() {
               <Label>Contact Phone *</Label>
               <Input
                 placeholder="Phone number"
-                value={data.emergency_contact_phone}
-                onChange={(e) => setData('emergency_contact_phone', e.target.value)}
+                value={data.emergencyContactPhone}
+                onChange={(e) => setData('emergencyContactPhone', e.target.value)}
+                aria-errormessage={errors?.emergencyContactPhone}
               />
             </div>
           </div>
@@ -231,12 +261,13 @@ export default function PatientEditPage() {
           <h2 className="text-lg font-medium border-b pb-2">Medical Information</h2>
 
           <div className="space-y-2">
-            <Label>Known Allergies</Label>
+            <Label>Known Allergies & Medical Conditions</Label>
             <Textarea
               placeholder="List any known allergies (medications, food, etc.)"
               value={data.allergies}
               onChange={(e) => setData('allergies', e.target.value)}
               rows={3}
+              aria-errormessage={errors?.allergies}
             />
           </div>
         </div>
