@@ -18,20 +18,20 @@ export default class Patient extends BaseModel {
   declare gender: string | null
 
   @column()
+  declare age: string
+
+  @column()
   declare phone: string | null
 
-  // Unique patient identifier (Medical Record Number)
   @column({ columnName: 'medical_record_number' })
   declare medicalRecordNumber: string
 
-  // National ID information
   @column({ columnName: 'national_id_type' })
   declare nationalIdType: string
 
   @column({ columnName: 'national_id_number' })
   declare nationalIdNumber: string | null
 
-  // Address information
   @column({ columnName: 'address_line' })
   declare addressLine: string
 
@@ -41,14 +41,12 @@ export default class Patient extends BaseModel {
   @column({ columnName: 'postal_code' })
   declare postalCode: string | null
 
-  // Emergency contact
   @column({ columnName: 'emergency_contact_name' })
   declare emergencyContactName: string
 
   @column({ columnName: 'emergency_contact_phone' })
   declare emergencyContactPhone: string
 
-  // Medical information
   @column()
   declare allergies: string | null
 

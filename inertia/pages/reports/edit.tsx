@@ -11,9 +11,9 @@ type ReportEditPageProps = {
     id: string
     findings: string
     impression?: string | null
-    report_date: string
+    reportDate: string
     status: string
-    radiologist_id?: string | null
+    radiologistId?: string | null
   }
   radiologists: { id: string; name: string }[]
 }
@@ -21,12 +21,12 @@ type ReportEditPageProps = {
 export default function ReportEditPage() {
   const { report, radiologists } = usePage<ReportEditPageProps>().props
 
-  const { data, setData, put, processing } = useForm({
+  const { data, setData, put, processing, errors } = useForm({
     findings: report.findings || '',
     impression: report.impression || '',
-    report_date: report.report_date,
+    reportDate: report.reportDate,
     status: report.status,
-    radiologist_id: report.radiologist_id || '',
+    radiologistId: report.radiologistId || '',
   })
 
   const findingsEditor = useEditor({
@@ -66,8 +66,9 @@ export default function ReportEditPage() {
             <Label>Report Date</Label>
             <Input
               type="date"
-              value={data.report_date}
-              onChange={(e) => setData('report_date', e.target.value)}
+              value={data.reportDate}
+              onChange={(e) => setData('reportDate', e.target.value)}
+              aria-errormessage={errors?.reportDate}
             />
           </div>
 
@@ -75,8 +76,8 @@ export default function ReportEditPage() {
             <Label>Radiologist</Label>
             <select
               className="w-full border rounded px-2 py-1"
-              value={data.radiologist_id}
-              onChange={(e) => setData('radiologist_id', e.target.value)}
+              value={data.radiologistId}
+              onChange={(e) => setData('radiologistId', e.target.value)}
             >
               <option value="">Select radiologist</option>
               {radiologists.map((r: any) => (

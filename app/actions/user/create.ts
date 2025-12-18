@@ -1,11 +1,11 @@
 import User from '#models/user'
 
 type CreateUserParams = {
-  first_name: string
-  last_name?: string | null
+  firstName: string
+  lastName?: string | null
   email: string
   password: string
-  role_id: number
+  roleId: number
 }
 
 export default class CreateUser {
@@ -14,11 +14,11 @@ export default class CreateUser {
     if (exists) throw new Error('Email already exists')
 
     const user = await User.create({
-      firstName: data.first_name,
-      lastName: data.last_name ?? null,
+      firstName: data.firstName,
+      lastName: data.lastName ?? null,
       email: data.email,
       password: data.password, // model hashes automatically
-      roleId: data.role_id,
+      roleId: data.roleId,
     })
 
     return user

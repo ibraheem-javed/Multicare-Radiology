@@ -15,10 +15,8 @@ export default class GetLogs {
   async handle(params: GetLogsParams) {
     const { page, perPage, entityType, action, userId, entityId, startDate, endDate } = params
 
-    // Build query with filters
     const query = AuditLog.query().preload('user').orderBy('created_at', 'desc')
 
-    // Apply filters if provided
     if (entityType) {
       query.where('entity_type', entityType)
     }
@@ -43,10 +41,8 @@ export default class GetLogs {
       query.where('created_at', '<=', endDate)
     }
 
-    // Execute query with pagination
     const logs = await query.paginate(page, perPage)
 
-    // Transform logs for frontend
     const logsData = logs.all().map((log) => ({
       id: log.id,
       action: log.action,

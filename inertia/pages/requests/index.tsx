@@ -1,6 +1,13 @@
 import { Link, usePage } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table'
 
 interface Patient {
   id: string
@@ -8,10 +15,10 @@ interface Patient {
   lastName: string
 }
 
-interface User {
+interface Requester {
   id: string
-  firstName: string
-  lastName: string
+  name: string
+  additionalInformation?: string | null
 }
 
 interface Request {
@@ -20,7 +27,7 @@ interface Request {
   requestDate: string
   status: string
   patient: Patient | null
-  requestedBy: User | null
+  requester: Requester | null
 }
 
 export default function RequestsIndex() {
@@ -53,9 +60,7 @@ export default function RequestsIndex() {
                 {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
               </TableCell>
               <TableCell>{r.procedureType}</TableCell>
-              <TableCell>
-                {r.requestedBy ? `${r.requestedBy.firstName} ${r.requestedBy.lastName}` : '-'}
-              </TableCell>
+              <TableCell>{r.requester ? r.requester.name : '-'}</TableCell>
               <TableCell>{r.requestDate}</TableCell>
               <TableCell className="capitalize">{r.status}</TableCell>
               <TableCell className="text-right">

@@ -1,17 +1,10 @@
 import Report from '#models/report'
-import ReportDTO from '#dtos/report'
 import type { HttpContext } from '@adonisjs/core/http'
 import LogAction from '#actions/audit/log'
-import { EntityType } from '#models/audit_log'
+import { EntityType } from '#enums/entity_type'
 
 export default class GetReport {
-  /**
-   * Get a single report with full details for display
-   * Used in: ReportsController.show()
-   *
-   * Logs report access for compliance
-   */
-  async handleForShow(ctx: HttpContext, id: string) {
+  async handleForShow(ctx: HttpContext, id: string): Promise<Report> {
     const report = await Report.query()
       .where('id', id)
       .preload('patient')
@@ -19,21 +12,15 @@ export default class GetReport {
       .preload('request')
       .firstOrFail()
 
-    // Log report access for audit trail (compliance requirement)
     if (ctx.auth.user) {
       const logAction = new LogAction(ctx)
       await logAction.logAccessed(ctx.auth.user.id, EntityType.REPORT, report.id)
     }
 
-    return ReportDTO.toDetailedFrontend(report)
+    return report
   }
 
-  /**
-   * Get a single report for editing
-   * Used in: ReportsController.edit()
-   */
-  async handle(id: string) {
-    const report = await Report.findOrFail(id)
-    return ReportDTO.toEditForm(report)
+  async handle(id: string): Promise<Report> {
+    return Report.findOrFail(id)
   }
 }

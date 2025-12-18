@@ -1,12 +1,18 @@
 import { reportValidator, updateReportValidator } from '#validators/report'
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
+
 import GetAllReports from '#actions/reports/get_all'
 import GetReport from '#actions/reports/get_single'
 import GetDataForCreate from '#actions/reports/get_data_for_create'
 import CreateReport from '#actions/reports/create'
 import UpdateReport from '#actions/reports/update'
 import DeleteReport from '#actions/reports/delete'
+
+import { toReportViewList, toReportDetailedView } from '#dtos/report/report_view'
+import { toReportForm } from '#dtos/report/report_form'
+import { toRadiologistDropdownList } from '#dtos/report/radiologist_dropdown'
+import { toDropdownList } from '#dtos/request/request_dropdown'
 
 @inject()
 export default class ReportsController {
@@ -21,17 +27,25 @@ export default class ReportsController {
 
   async index({ inertia }: HttpContext) {
     const reports = await this.getAllReports.handle()
-    return inertia.render('reports/index', { reports })
+
+    return inertia.render('reports/index', {
+      reports: toReportViewList(reports),
+    })
   }
 
   async showCreateForm({ inertia }: HttpContext) {
     const { requests, radiologists } = await this.getDataForCreate.handle()
-    return inertia.render('reports/create', { requests, radiologists })
+
+    return inertia.render('reports/create', {
+      requests: toDropdownList(requests),
+      radiologists: toRadiologistDropdownList(radiologists),
+    })
   }
 
   async store(ctx: HttpContext) {
     const { request, response } = ctx
     const data = await request.validateUsing(reportValidator)
+
     await this.createReport.handle(ctx, data)
     return response.redirect().toPath('/reports')
   }
@@ -39,24 +53,33 @@ export default class ReportsController {
   async show(ctx: HttpContext) {
     const { params, inertia } = ctx
     const report = await this.getReport.handleForShow(ctx, params.id)
-    return inertia.render('reports/show', { report })
+
+    return inertia.render('reports/show', {
+      report: toReportDetailedView(report),
+    })
   }
 
   async showEditForm({ params, inertia }: HttpContext) {
     const report = await this.getReport.handle(params.id)
     const { radiologists } = await this.getDataForCreate.handle()
-    return inertia.render('reports/edit', { report, radiologists })
+
+    return inertia.render('reports/edit', {
+      report: toReportForm(report),
+      radiologists: toRadiologistDropdownList(radiologists),
+    })
   }
 
   async update(ctx: HttpContext) {
     const { params, request, response } = ctx
     const data = await request.validateUsing(updateReportValidator)
+
     await this.updateReport.handle(ctx, params.id, data)
     return response.redirect().toPath(`/reports/${params.id}`)
   }
 
   async destroy(ctx: HttpContext) {
     const { params, response } = ctx
+
     await this.deleteReport.handle(ctx, params.id)
     return response.redirect().toPath('/reports')
   }

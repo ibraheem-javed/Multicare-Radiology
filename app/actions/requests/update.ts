@@ -3,43 +3,48 @@ import { RequestStatus } from '#enums/request_status'
 import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 import LogAction from '#actions/audit/log'
-import { EntityType } from '#models/audit_log'
+import { EntityType } from '#enums/entity_type'
 
 export default class UpdateRequest {
-  /**
-   * Update an existing radiology request
-   * Used in: RequestsController.update()
-   *
-   * Includes audit logging for compliance
-   */
   async handle(
     ctx: HttpContext,
     id: string,
     data: {
-      patient_id?: string
-      procedure_type?: string
-      requested_by?: string
-      request_date?: Date
+      patientId?: string
+      procedureType?: string
+      requesterId?: string
+      requesterAdditionalInformation?: string | null
+      requestDate?: Date | string
       status?: RequestStatus
     }
   ) {
     const request = await Request.findOrFail(id)
-
-    // Capture old data for audit trail
     const oldData = request.toJSON()
 
-    // Map snake_case to camelCase for Lucid
-    const updateData: Partial<Record<string, unknown>> = {}
-    if (data.patient_id) updateData.patientId = data.patient_id
-    if (data.procedure_type) updateData.procedureType = data.procedure_type
-    if (data.requested_by) updateData.requestedById = data.requested_by
-    if (data.request_date) updateData.requestDate = DateTime.fromJSDate(data.request_date)
-    if (data.status) updateData.status = data.status
+    const requestUpdateData = {
+      patientId: data.patientId,
+      procedureType: data.procedureType,
+      requesterId: data.requesterId,
+      status: data.status,
+      requestDate: data.requestDate
+        ? typeof data.requestDate === 'string'
+          ? DateTime.fromISO(data.requestDate)
+          : DateTime.fromJSDate(data.requestDate)
+        : undefined,
+    }
 
-    request.merge(updateData)
+    request.merge(requestUpdateData)
     await request.save()
 
-    // Log request update for audit trail
+    if (data.requesterAdditionalInformation && data.requesterId) {
+      const requester = await request.related('requester').query().first()
+
+      if (requester) {
+        requester.additionalInformation = data.requesterAdditionalInformation
+        await requester.save()
+      }
+    }
+
     if (ctx.auth.user) {
       const logAction = new LogAction(ctx)
       await logAction.logUpdated(

@@ -1,6 +1,8 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import AuditLog, { AuditAction, EntityType } from '#models/audit_log'
+import AuditLog from '#models/audit_log'
+import { EntityType } from '#enums/entity_type'
+import { AuditAction } from '#enums/audit_action'
 
 type LogActionParams = {
   userId: string
@@ -19,13 +21,6 @@ type LogActionParams = {
 export default class LogAction {
   constructor(protected ctx: HttpContext) {}
 
-  /**
-   * Log an audit trail entry
-   * Used for tracking all create, update, delete, and access operations
-   *
-   * @param params - Audit log parameters
-   * @returns Created audit log entry
-   */
   async handle(params: LogActionParams) {
     const auditLog = await AuditLog.create({
       userId: params.userId,
@@ -40,9 +35,6 @@ export default class LogAction {
     return auditLog
   }
 
-  /**
-   * Helper: Log creation of an entity
-   */
   async logCreated(
     userId: string,
     entityType: EntityType,
@@ -58,9 +50,6 @@ export default class LogAction {
     })
   }
 
-  /**
-   * Helper: Log update of an entity
-   */
   async logUpdated(
     userId: string,
     entityType: EntityType,
@@ -77,9 +66,6 @@ export default class LogAction {
     })
   }
 
-  /**
-   * Helper: Log deletion of an entity
-   */
   async logDeleted(
     userId: string,
     entityType: EntityType,
@@ -95,9 +81,6 @@ export default class LogAction {
     })
   }
 
-  /**
-   * Helper: Log access to an entity
-   */
   async logAccessed(userId: string, entityType: EntityType, entityId: string) {
     return this.handle({
       userId,

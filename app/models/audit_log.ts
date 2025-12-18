@@ -2,20 +2,8 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
-
-export enum AuditAction {
-  CREATED = 'created',
-  UPDATED = 'updated',
-  DELETED = 'deleted',
-  ACCESSED = 'accessed',
-}
-
-export enum EntityType {
-  PATIENT = 'Patient',
-  REQUEST = 'Request',
-  REPORT = 'Report',
-  USER = 'User',
-}
+import { AuditAction } from '#enums/audit_action'
+import { EntityType } from '#enums/entity_type'
 
 export default class AuditLog extends BaseModel {
   @column({ isPrimary: true })
@@ -48,7 +36,6 @@ export default class AuditLog extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
-  // Relationships
   @belongsTo(() => User, { foreignKey: 'userId' })
   declare user: BelongsTo<typeof User>
 }

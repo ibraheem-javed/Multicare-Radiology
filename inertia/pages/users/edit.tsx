@@ -16,18 +16,18 @@ type Props = {
 }
 
 type EditUserForm = {
-  first_name: string
-  last_name: string
+  firstName: string
+  lastName: string
   password: string
-  role_id: number
+  roleId: number
 }
 
 export default function EditUser({ user, roles }: Props) {
-  const { data, setData, put, processing } = useForm<EditUserForm>({
-    first_name: user.firstName,
-    last_name: user.lastName ?? '',
+  const { data, setData, put, processing, errors } = useForm<EditUserForm>({
+    firstName: user.firstName,
+    lastName: user.lastName ?? '',
     password: '',
-    role_id: user.role?.id || 0, // safe fallback
+    roleId: user.role?.id || 0, // safe fallback
   })
 
   const roleOptions = [
@@ -52,12 +52,20 @@ export default function EditUser({ user, roles }: Props) {
       <form onSubmit={submit} className="space-y-4 max-w-md">
         <div>
           <Label>First Name</Label>
-          <Input value={data.first_name} onChange={(e) => setData('first_name', e.target.value)} />
+          <Input
+            value={data.firstName}
+            onChange={(e) => setData('firstName', e.target.value)}
+            aria-errormessage={errors?.firstName}
+          />
         </div>
 
         <div>
           <Label>Last Name</Label>
-          <Input value={data.last_name} onChange={(e) => setData('last_name', e.target.value)} />
+          <Input
+            value={data.lastName}
+            onChange={(e) => setData('lastName', e.target.value)}
+            aria-errormessage={errors?.lastName}
+          />
         </div>
 
         <div>
@@ -66,6 +74,7 @@ export default function EditUser({ user, roles }: Props) {
             type="password"
             value={data.password}
             onChange={(e) => setData('password', e.target.value)}
+            aria-errormessage={errors?.password}
           />
         </div>
 
@@ -73,8 +82,8 @@ export default function EditUser({ user, roles }: Props) {
           <Label>Role</Label>
           <select
             className="w-full border rounded px-3 py-2"
-            value={data.role_id}
-            onChange={(e) => setData('role_id', Number(e.target.value))}
+            value={data.roleId}
+            onChange={(e) => setData('roleId', Number(e.target.value))}
           >
             <option value={0}>Select role</option>
             {roleOptions.map((role) => (

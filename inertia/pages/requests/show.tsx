@@ -7,10 +7,10 @@ interface Patient {
   lastName: string
 }
 
-interface User {
+interface Requester {
   id: string
-  firstName: string
-  lastName: string
+  name: string
+  additionalInformation?: string | null
 }
 
 interface Request {
@@ -19,7 +19,7 @@ interface Request {
   requestDate: string
   status: string
   patient: Patient | null
-  requestedBy: User | null
+  requester: Requester | null
 }
 
 export default function RequestShowPage() {
@@ -43,8 +43,11 @@ export default function RequestShowPage() {
           <strong>Procedure:</strong> {request.procedureType}
         </div>
         <div>
-          <strong>Requested By:</strong>{' '}
-          {request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : '-'}
+          <strong>Requested By:</strong> {request.requester ? request.requester.name : '-'}
+        </div>
+        <div>
+          <strong>Additional Requester Information:</strong>
+          {request.requester?.additionalInformation ?? '-'}
         </div>
         <div>
           <strong>Date:</strong> {request.requestDate}
