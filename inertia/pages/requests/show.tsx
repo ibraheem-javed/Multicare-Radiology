@@ -1,5 +1,7 @@
-import { usePage, Link } from '@inertiajs/react'
+import { usePage, Link, Head } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Separator } from '~/components/ui/separator'
 
 interface Patient {
   id: string
@@ -26,36 +28,53 @@ export default function RequestShowPage() {
   const { request } = usePage<{ request: Request }>().props
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Request Details</h1>
-        <Link href={`/requests/${request.id}/edit`}>
-          <Button>Edit</Button>
-        </Link>
-      </div>
+    <>
+      <Head title="Multicare - Requests" />
 
-      <div className="space-y-2 text-sm">
-        <div>
-          <strong>Patient:</strong>{' '}
-          {request.patient ? `${request.patient.firstName} ${request.patient.lastName}` : '-'}
+      <div className="max-w-xl space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">Request Details</h1>
+
+          <Link href={`/requests/${request.id}/edit`}>
+            <Button>Edit</Button>
+          </Link>
         </div>
-        <div>
-          <strong>Procedure:</strong> {request.procedureType}
-        </div>
-        <div>
-          <strong>Requested By:</strong> {request.requester ? request.requester.name : '-'}
-        </div>
-        <div>
-          <strong>Additional Requester Information:</strong>
-          {request.requester?.additionalInformation ?? '-'}
-        </div>
-        <div>
-          <strong>Date:</strong> {request.requestDate}
-        </div>
-        <div>
-          <strong>Status:</strong> {request.status}
-        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Request Information</CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-3 text-sm">
+            <Detail label="Patient">
+              {request.patient ? `${request.patient.firstName} ${request.patient.lastName}` : '—'}
+            </Detail>
+
+            <Detail label="Procedure">{request.procedureType}</Detail>
+
+            <Detail label="Requested By">{request.requester?.name ?? '—'}</Detail>
+
+            <Detail label="Additional Requester Information">
+              {request.requester?.additionalInformation ?? '—'}
+            </Detail>
+
+            <Separator />
+
+            <Detail label="Date">{request.requestDate}</Detail>
+
+            <Detail label="Status">{request.status}</Detail>
+          </CardContent>
+        </Card>
       </div>
+    </>
+  )
+}
+
+function Detail({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex justify-between gap-4">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-right">{children}</span>
     </div>
   )
 }

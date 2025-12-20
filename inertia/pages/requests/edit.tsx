@@ -1,32 +1,25 @@
-import { usePage, useForm } from '@inertiajs/react'
+import { useState } from 'react'
+import { usePage, useForm, Head } from '@inertiajs/react'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '~/components/ui/select'
 
-type Patient = {
-  id: string
-  firstName: string
-  lastName: string
-}
-
-type Requester = {
-  id: string
-  name: string
-  additionalInformation?: string | null
-}
-
+type Patient = { id: string; firstName: string; lastName: string }
+type Requester = { id: string; name: string; additionalInformation?: string | null }
 type Request = {
   id: string
   patientId: string
   procedureType: string
-  requesterId: string
+  requesterId: string | null
+  requesterName?: string
   requesterAdditionalInformation?: string | null
   requestDate: string
   status: string
@@ -42,121 +35,148 @@ export default function RequestEditPage() {
   const { data, setData, put, errors, processing } = useForm({
     patientId: request.patientId,
     procedureType: request.procedureType,
-    requesterId: request.requesterId,
+    requesterId: request.requesterId ?? null,
+    requesterName: request.requesterName ?? '',
     requesterAdditionalInformation: request.requesterAdditionalInformation ?? '',
     requestDate: request.requestDate,
     status: request.status,
   })
 
-  console.log(request)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [filteredRequesters, setFilteredRequesters] = useState<Requester[]>(requesters)
+
+  function handleRequesterInput(val: string) {
+    setData('requesterName', val)
+    setData('requesterId', null)
+    setDropdownOpen(true)
+
+    const filtered = requesters.filter((r) => r.name.toLowerCase().includes(val.toLowerCase()))
+    setFilteredRequesters(filtered)
+  }
+
+  function handleRequesterSelect(r: Requester) {
+    setData('requesterName', r.name)
+    setData('requesterId', r.id)
+    setData('requesterAdditionalInformation', r.additionalInformation || '')
+    setDropdownOpen(false)
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     put(`/requests/${request.id}`)
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Edit Request</h1>
+    <>
+      <Head title="Multicare - Edit Request" />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Patient */}
-        <div className="space-y-2">
-          <Label>Patient</Label>
-          <Select value={data.patientId} onValueChange={(value) => setData('patientId', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Patient" />
-            </SelectTrigger>
-            <SelectContent>
-              {patients.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.firstName} {p.lastName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="max-w-xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>Edit Request</CardTitle>
+          </CardHeader>
 
-        {/* Procedure Type */}
-        <div className="space-y-2">
-          <Label>Procedure Type</Label>
-          <Input
-            value={data.procedureType}
-            onChange={(e) => setData('procedureType', e.target.value)}
-            aria-errormessage={errors?.procedureType}
-          />
-        </div>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Patient */}
+              <div className="space-y-1">
+                <Label>Patient</Label>
+                <Select
+                  value={data.patientId}
+                  onValueChange={(value) => setData('patientId', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {patients.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.firstName} {p.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-        {/* Requester */}
-        <div className="space-y-2">
-          <Label>Requested By</Label>
-          <Select
-            value={data.requesterId}
-            onValueChange={(value) => {
-              setData('requesterId', value)
+              {/* Procedure */}
+              <div className="space-y-1">
+                <Label>Procedure Type</Label>
+                <Input
+                  value={data.procedureType}
+                  onChange={(e) => setData('procedureType', e.target.value)}
+                  aria-errormessage={errors?.procedureType}
+                />
+              </div>
 
-              // Find the selected requester from the requesters array
-              const selectedRequester = requesters.find((r) => r.id === value)
+              {/* Requester (CUSTOM — untouched logic) */}
+              <div className="space-y-1 relative">
+                <Label>Requester</Label>
+                <Input
+                  placeholder="Select or type requester"
+                  value={data.requesterName}
+                  onChange={(e) => handleRequesterInput(e.target.value)}
+                  onFocus={() => setDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setDropdownOpen(false), 100)}
+                />
 
-              // Update the additional info field accordingly
-              setData(
-                'requesterAdditionalInformation',
-                selectedRequester?.additionalInformation ?? ''
-              )
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Requester" />
-            </SelectTrigger>
-            <SelectContent>
-              {requesters.map((r) => (
-                <SelectItem key={r.id} value={r.id}>
-                  {r.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+                {dropdownOpen && filteredRequesters.length > 0 && (
+                  <ul className="absolute left-0 right-0 mt-1 max-h-60 overflow-auto rounded-md border bg-background shadow z-50">
+                    {filteredRequesters.map((r) => (
+                      <li
+                        key={r.id}
+                        onMouseDown={() => handleRequesterSelect(r)}
+                        className="px-3 py-2 cursor-pointer hover:bg-muted"
+                      >
+                        {r.name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
-        {/* Additional Information */}
-        <div className="space-y-2">
-          <Label>Additional Requester Information</Label>
-          <Input
-            value={data.requesterAdditionalInformation}
-            onChange={(e) => setData('requesterAdditionalInformation', e.target.value)}
-            placeholder="Optional info"
-            aria-errormessage={errors?.requesterAdditionalInformation}
-          />
-        </div>
+              {/* Additional Info */}
+              <div className="space-y-1">
+                <Label>Additional Requester Information</Label>
+                <Input
+                  value={data.requesterAdditionalInformation || ''}
+                  onChange={(e) => setData('requesterAdditionalInformation', e.target.value)}
+                  placeholder="Optional info"
+                  aria-errormessage={errors?.requesterAdditionalInformation}
+                />
+              </div>
 
-        {/* Request Date */}
-        <div className="space-y-2">
-          <Label>Request Date</Label>
-          <Input
-            type="date"
-            value={data.requestDate}
-            onChange={(e) => setData('requestDate', e.target.value)}
-            aria-errormessage={errors?.requesterAdditionalInformation}
-          />
-        </div>
+              {/* Date */}
+              <div className="space-y-1">
+                <Label>Request Date</Label>
+                <Input
+                  type="date"
+                  value={data.requestDate}
+                  onChange={(e) => setData('requestDate', e.target.value)}
+                  aria-errormessage={errors?.requestDate}
+                />
+              </div>
 
-        {/* Status */}
-        <div className="space-y-2">
-          <Label>Status</Label>
-          <Select value={data.status} onValueChange={(value) => setData('status', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+              {/* Status */}
+              <div className="space-y-1">
+                <Label>Status</Label>
+                <Select value={data.status} onValueChange={(value) => setData('status', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-        <Button type="submit" disabled={processing}>
-          Update Request
-        </Button>
-      </form>
-    </div>
+              <Button type="submit" disabled={processing}>
+                Update Request
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

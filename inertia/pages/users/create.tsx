@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { Eye, EyeOff } from 'lucide-react'
+import { useState } from 'react'
 import RolesEnum from '#enums/roles'
 
 type CreateUserProps = {
@@ -16,12 +18,16 @@ type CreateUserProps = {
 }
 
 export default function CreateUser({ roles }: CreateUserProps) {
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
   const { data, setData, post, processing, errors } = useForm({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
-    roleId: 0, // numeric type for enum
+    passwordConfirmation: '',
+    roleId: 0,
   })
 
   const roleOptions = [
@@ -39,7 +45,7 @@ export default function CreateUser({ roles }: CreateUserProps) {
 
   return (
     <>
-      <Head title="Create User" />
+      <Head title="Multicare - Create User" />
 
       <h1 className="text-xl font-semibold mb-6">Create New User</h1>
 
@@ -75,26 +81,75 @@ export default function CreateUser({ roles }: CreateUserProps) {
           />
         </div>
 
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={data.password}
-            onChange={(e) => setData('password', e.target.value)}
-            aria-errormessage={errors?.password}
-          />
+
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={data.password}
+              onChange={(e) => setData('password', e.target.value)}
+              className="pr-10"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground cursor-pointer"
+              tabIndex={-1}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+
+          {errors?.password && <div className="text-red-400 text-sm">{errors.password}</div>}
         </div>
 
-        <div>
+        <div className="space-y-2">
+          <Label>Confirm Password</Label>
+
+          <div className="relative">
+            <Input
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={data.passwordConfirmation}
+              onChange={(e) => setData('passwordConfirmation', e.target.value)}
+              aria-errormessage={errors?.passwordConfirmation}
+              className="pr-10"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground cursor-pointer"
+              tabIndex={-1}
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+            >
+              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+
+          {errors?.passwordConfirmation && (
+            <div className="text-red-400 text-sm">{errors.passwordConfirmation}</div>
+          )}
+        </div>
+
+        <div className="space-y-1">
           <Label>Role</Label>
+
           <Select
-            value={data.roleId.toString()}
+            value={data.roleId ? data.roleId.toString() : ''}
             onValueChange={(value) => setData('roleId', Number(value))}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger
+              className={`w-full ${errors?.roleId ? 'border-red-400 focus:ring-red-400' : ''}`}
+              aria-invalid={!!errors?.roleId}
+              aria-describedby={errors?.roleId ? 'roleId-error' : undefined}
+            >
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
+
             <SelectContent>
               {roleOptions.map((role) => (
                 <SelectItem key={role.id} value={role.id.toString()}>
@@ -103,6 +158,12 @@ export default function CreateUser({ roles }: CreateUserProps) {
               ))}
             </SelectContent>
           </Select>
+
+          {errors?.roleId && (
+            <p id="roleId-error" className="text-red-400 text-sm">
+              {errors.roleId}
+            </p>
+          )}
         </div>
 
         <Button type="submit" disabled={processing}>

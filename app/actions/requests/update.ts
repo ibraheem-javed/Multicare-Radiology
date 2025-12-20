@@ -4,6 +4,7 @@ import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 import LogAction from '#actions/audit/log'
 import { EntityType } from '#enums/entity_type'
+import Requester from '#models/requester'
 
 export default class UpdateRequest {
   async handle(
@@ -13,6 +14,7 @@ export default class UpdateRequest {
       patientId?: string
       procedureType?: string
       requesterId?: string
+      requesterName?: string
       requesterAdditionalInformation?: string | null
       requestDate?: Date | string
       status?: RequestStatus
@@ -21,30 +23,32 @@ export default class UpdateRequest {
     const request = await Request.findOrFail(id)
     const oldData = request.toJSON()
 
-    const requestUpdateData = {
+    let requesterId = data.requesterId
+
+    if (!requesterId && data.requesterName) {
+      const requester = await Requester.create({
+        name: data.requesterName,
+        additionalInformation: data.requesterAdditionalInformation ?? null,
+      })
+
+      requesterId = requester.id
+    }
+
+    request.merge({
       patientId: data.patientId,
       procedureType: data.procedureType,
-      requesterId: data.requesterId,
+      requesterId,
       status: data.status,
       requestDate: data.requestDate
         ? typeof data.requestDate === 'string'
           ? DateTime.fromISO(data.requestDate)
           : DateTime.fromJSDate(data.requestDate)
         : undefined,
-    }
+    })
 
-    request.merge(requestUpdateData)
     await request.save()
 
-    if (data.requesterAdditionalInformation && data.requesterId) {
-      const requester = await request.related('requester').query().first()
-
-      if (requester) {
-        requester.additionalInformation = data.requesterAdditionalInformation
-        await requester.save()
-      }
-    }
-
+    // ✅ Audit log
     if (ctx.auth.user) {
       const logAction = new LogAction(ctx)
       await logAction.logUpdated(

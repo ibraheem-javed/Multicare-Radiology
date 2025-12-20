@@ -28,6 +28,11 @@ export default class UsersController {
   }
 
   async store({ request, response }: HttpContext) {
+    console.log(request.all())
+    request.updateBody({
+      ...request.all(),
+      password_confirmation: request.input('passwordConfirmation'),
+    })
     const data = await request.validateUsing(userValidator)
     try {
       await this.createUser.handle(data)
@@ -48,6 +53,18 @@ export default class UsersController {
   }
 
   async update({ params, request, response }: HttpContext) {
+    const payload = request.only([
+      'firstName',
+      'lastName',
+      'password',
+      'passwordConfirmation',
+      'roleId',
+    ])
+
+    request.updateBody({
+      ...payload,
+      password_confirmation: payload.passwordConfirmation,
+    })
     const data = await request.validateUsing(userUpdateValidator)
     await this.updateUser.handle({ userId: params.id, ...data })
     return response.redirect().toPath(`/users/${params.id}`)
