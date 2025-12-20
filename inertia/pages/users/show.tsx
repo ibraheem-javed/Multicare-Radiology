@@ -1,5 +1,7 @@
 import { Head, Link } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Separator } from '~/components/ui/separator'
 
 type Props = {
   user: any
@@ -8,9 +10,9 @@ type Props = {
 export default function ShowUser({ user }: Props) {
   return (
     <>
-      <Head title="User Details" />
+      <Head title="Multicare - User Details" />
 
-      <div className="flex justify-between mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold">User Details</h1>
 
         <Link href={`/users/${user.id}/edit`}>
@@ -18,36 +20,44 @@ export default function ShowUser({ user }: Props) {
         </Link>
       </div>
 
-      <div className="space-y-4 max-w-md">
-        <div>
-          <p className="text-sm text-gray-500">Name</p>
-          <p className="font-medium">
-            {user.firstName} {user.lastName}
-          </p>
-        </div>
+      <Card className="max-w-md">
+        <CardHeader>
+          <CardTitle>User Information</CardTitle>
+        </CardHeader>
 
-        <div>
-          <p className="text-sm text-gray-500">Email</p>
-          <p className="font-medium">{user.email}</p>
-        </div>
+        <Separator />
 
-        <div>
-          <p className="text-sm text-gray-500">Role</p>
-          <p className="font-medium">{user.role?.name}</p>
-        </div>
+        <CardContent className="space-y-4 pt-6">
+          <div>
+            <p className="text-sm text-muted-foreground">Name</p>
+            <p className="font-medium">
+              {user.firstName} {user.lastName}
+            </p>
+          </div>
 
-        <div>
-          <p className="text-sm text-gray-500">Created At</p>
-          <p className="font-medium">{new Date(user.createdAt).toLocaleString()}</p>
-        </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Email</p>
+            <p className="font-medium">{user.email}</p>
+          </div>
 
-        <div>
-          <p className="text-sm text-gray-500">Last Updated</p>
-          <p className="font-medium">
-            {user.updatedAt ? new Date(user.updatedAt).toLocaleString() : '—'}
-          </p>
-        </div>
-      </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Role</p>
+            <p className="font-medium">{user.role?.name}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-muted-foreground">Created At</p>
+            <p className="font-medium">{new Date(user.createdAt).toLocaleString()}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-muted-foreground">Last Updated</p>
+            <p className="font-medium">
+              {user.updatedAt ? new Date(user.updatedAt).toLocaleString() : '—'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="mt-8">
         <Link href="/users">

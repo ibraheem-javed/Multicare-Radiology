@@ -1,4 +1,8 @@
-import { requestValidator } from '#validators/request'
+import {
+  requestValidator,
+  requestWithRequesterIdValidator,
+  requestWithRequesterNameValidator,
+} from '#validators/request'
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 
@@ -50,12 +54,27 @@ export default class RequestsController {
     })
   }
 
+  // async store(ctx: HttpContext) {
+  //   const { request, response } = ctx
+  //   const data = await request.validateUsing(requestValidator)
+
+  //   if (!data.requesterId && !data.requesterName) {
+  //     return response.badRequest('Either requester_id or requester_name must be provided')
+  //   }
+
+  //   await this.createRequest.handle(ctx, data)
+  //   return response.redirect().toPath('/requests')
+  // }
+
   async store(ctx: HttpContext) {
     const { request, response } = ctx
-    const data = await request.validateUsing(requestValidator)
+    const payload = request.all()
 
-    if (!data.requesterId && !data.requesterName) {
-      return response.badRequest('Either requester_id or requester_name must be provided')
+    let data
+    if (payload.requesterId) {
+      data = await request.validateUsing(requestWithRequesterIdValidator)
+    } else {
+      data = await request.validateUsing(requestWithRequesterNameValidator)
     }
 
     await this.createRequest.handle(ctx, data)
@@ -75,8 +94,10 @@ export default class RequestsController {
 
   async update(ctx: HttpContext) {
     const { params, request, response } = ctx
+    console.log('controller hitting')
+    console.log('data for valudation is', request.all())
     const data = await request.validateUsing(requestValidator)
-
+    console.log('validated data is', data)
     await this.updateRequest.handle(ctx, params.id, data)
     return response.redirect().toPath(`/requests/${params.id}`)
   }
