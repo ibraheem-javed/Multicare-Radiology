@@ -96,7 +96,7 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <SidebarMenuButton asChild>
-          <Link className="flex items-center gap-2" href="/auth/logout" method="post">
+          <Link className="flex items-center gap-2" href="/auth/logout" method="post" replace>
             <Settings className="w-4 h-4" />
             <span>Logout</span>
           </Link>

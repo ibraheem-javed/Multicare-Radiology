@@ -28,3 +28,30 @@ export function requesterToDropdown(requester: any) {
     additionalInformation: requester.additionalInformation,
   }
 }
+
+export function toPatientRequests(requests: Request[]) {
+  const map: Record<string, any> = {}
+
+  requests.forEach((req) => {
+    if (!req.patient) return
+
+    const pid = req.patient.id
+    if (!map[pid]) {
+      map[pid] = {
+        id: req.patient.id,
+        firstName: req.patient.firstName,
+        lastName: req.patient.lastName,
+        pendingRequests: [],
+      }
+    }
+
+    if (req.status === 'pending') {
+      map[pid].pendingRequests.push({
+        id: req.id,
+        procedure: req.procedureType,
+      })
+    }
+  })
+
+  return Object.values(map)
+}

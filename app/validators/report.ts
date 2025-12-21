@@ -3,6 +3,7 @@ import { ReportStatus } from '#enums/report_status'
 
 export const reportValidator = vine.compile(
   vine.object({
+    patientId: vine.string().uuid().optional(),
     requestId: vine.string().uuid(),
     findings: vine.string().minLength(10),
     impression: vine.string().nullable(),

@@ -45,26 +45,17 @@ export default class RequestsController {
     })
   }
 
-  async showCreateForm({ inertia }: HttpContext) {
+  async showCreateForm({ inertia, request }: HttpContext) {
     const { patients, requesters } = await this.getPatientsForCreate.handle()
+
+    const preselectedPatientId = request.input('patientId') || null
 
     return inertia.render('requests/create', {
       patients: patients.map((p) => patientToDropdown(p)),
       requesters: requesters.map((r) => requesterToDropdown(r)),
+      preselectedPatientId,
     })
   }
-
-  // async store(ctx: HttpContext) {
-  //   const { request, response } = ctx
-  //   const data = await request.validateUsing(requestValidator)
-
-  //   if (!data.requesterId && !data.requesterName) {
-  //     return response.badRequest('Either requester_id or requester_name must be provided')
-  //   }
-
-  //   await this.createRequest.handle(ctx, data)
-  //   return response.redirect().toPath('/requests')
-  // }
 
   async store(ctx: HttpContext) {
     const { request, response } = ctx
