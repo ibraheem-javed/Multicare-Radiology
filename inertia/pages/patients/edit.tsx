@@ -10,6 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { useState } from 'react'
+import { Popover, PopoverTrigger, PopoverContent } from '~/components/ui/popover'
+import { cn } from '~/lib/utils'
+import { CalendarIcon } from 'lucide-react'
+import { Calendar } from '~/components/ui/calendar'
+import { format } from 'date-fns'
 
 type Patient = {
   id: string
@@ -31,6 +37,7 @@ type Patient = {
 }
 
 export default function PatientEditPage() {
+  const [dobOpen, setDobOpen] = useState(false)
   const { patient } = usePage<{ patient: Patient }>().props
 
   // Helper to convert formatted date (Jan 01, 2000) back to ISO format (2000-01-01)
@@ -138,12 +145,46 @@ export default function PatientEditPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Date of Birth</Label>
-              <Input
-                type="date"
-                value={data.dateOfBirth}
-                onChange={(e) => setData('dateOfBirth', e.target.value)}
-                aria-errormessage={errors?.dateOfBirth}
-              />
+
+              <Popover open={dobOpen} onOpenChange={setDobOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !data.dateOfBirth && 'text-muted-foreground'
+                    )}
+                    aria-invalid={Boolean(errors?.dateOfBirth)}
+                    aria-describedby="dob-error"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {data.dateOfBirth ? format(new Date(data.dateOfBirth), 'PPP') : 'Pick a date'}
+                  </Button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={data.dateOfBirth ? new Date(data.dateOfBirth) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        setData('dateOfBirth', format(date, 'yyyy-MM-dd'))
+                        setDobOpen(false) // close popover on select
+                      }
+                    }}
+                    captionLayout="dropdown"
+                    startMonth={new Date(1900, 0)}
+                    endMonth={new Date(new Date().getFullYear(), 11)}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              {errors?.dateOfBirth && (
+                <p id="dob-error" className="text-red-400 text-sm">
+                  {errors.dateOfBirth}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

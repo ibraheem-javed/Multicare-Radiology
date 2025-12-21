@@ -1,5 +1,7 @@
 import { Link, usePage } from '@inertiajs/react'
+import { useState, useMemo } from 'react'
 import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
 import {
   Table,
   TableBody,
@@ -33,17 +35,47 @@ interface Request {
 
 export default function RequestsIndex() {
   const { requests } = usePage<{ requests: Request[] }>().props
+  const [search, setSearch] = useState('')
+
+  const filteredRequests = useMemo(() => {
+    if (!search) return requests
+
+    const q = search.toLowerCase()
+
+    return requests.filter((r) =>
+      [
+        r.procedureType,
+        r.status,
+        r.requestDate,
+        r.patient?.firstName,
+        r.patient?.lastName,
+        r.requester?.name,
+      ]
+        .filter(Boolean)
+        .some((v) => v!.toLowerCase().includes(q))
+    )
+  }, [requests, search])
 
   return (
     <>
-      <Head title="Multicare - Request Details" />
+      <Head title="Multicare - Radiology Requests" />
+
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Radiology Requests</h1>
+
           <Link href="/requests/create">
             <Button>Add Request</Button>
           </Link>
         </div>
+
+        {/* 🔍 Client-side search */}
+        <Input
+          placeholder="Search patient, procedure, requester, status..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-sm"
+        />
 
         <Table>
           <TableHeader>
@@ -53,17 +85,18 @@ export default function RequestsIndex() {
               <TableHead>Requested By</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead></TableHead>
+              <TableHead />
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {requests.map((r) => (
+            {filteredRequests.map((r) => (
               <TableRow key={r.id}>
                 <TableCell>
                   {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
                 </TableCell>
                 <TableCell>{r.procedureType}</TableCell>
-                <TableCell>{r.requester ? r.requester.name : '-'}</TableCell>
+                <TableCell>{r.requester?.name || '-'}</TableCell>
                 <TableCell>{r.requestDate}</TableCell>
                 <TableCell className="capitalize">{r.status}</TableCell>
                 <TableCell className="text-right">
@@ -73,9 +106,18 @@ export default function RequestsIndex() {
                 </TableCell>
               </TableRow>
             ))}
+
+            {filteredRequests.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  No requests found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
     </>
   )
 }
+

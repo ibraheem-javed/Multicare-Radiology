@@ -35,3 +35,6 @@ CLAUDE.local.md
 .claude/
 .claude/settings.local.json
 .claude/rules/local/
+
+# Backend search logic for future
+.backupcode

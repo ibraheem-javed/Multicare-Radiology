@@ -10,8 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { Popover, PopoverTrigger, PopoverContent } from '~/components/ui/popover'
+import { cn } from '~/lib/utils'
+import { CalendarIcon } from 'lucide-react'
+import { Calendar } from '~/components/ui/calendar'
+import { format } from 'date-fns'
+import { useState } from 'react'
 
 export default function PatientCreatePage() {
+  const [dobOpen, setDobOpen] = useState(false)
   const { data, setData, post, errors, processing } = useForm({
     firstName: '',
     lastName: '',
@@ -28,6 +35,7 @@ export default function PatientCreatePage() {
     emergencyContactName: '',
     emergencyContactPhone: '',
     allergies: '',
+    intent: 'save',
   })
 
   function handleSubmit(e: React.FormEvent) {
@@ -88,12 +96,46 @@ export default function PatientCreatePage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Date of Birth</Label>
-              <Input
-                type="date"
-                value={data.dateOfBirth}
-                onChange={(e) => setData('dateOfBirth', e.target.value)}
-                aria-errormessage={errors?.dateOfBirth}
-              />
+
+              <Popover open={dobOpen} onOpenChange={setDobOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !data.dateOfBirth && 'text-muted-foreground'
+                    )}
+                    aria-invalid={Boolean(errors?.dateOfBirth)}
+                    aria-describedby="dob-error"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {data.dateOfBirth ? format(new Date(data.dateOfBirth), 'PPP') : 'Pick a date'}
+                  </Button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={data.dateOfBirth ? new Date(data.dateOfBirth) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        setData('dateOfBirth', format(date, 'yyyy-MM-dd'))
+                        setDobOpen(false) // close popover on select
+                      }
+                    }}
+                    captionLayout="dropdown"
+                    startMonth={new Date(1900, 0)}
+                    endMonth={new Date(new Date().getFullYear(), 11)}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              {errors?.dateOfBirth && (
+                <p id="dob-error" className="text-red-400 text-sm">
+                  {errors.dateOfBirth}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -222,10 +264,22 @@ export default function PatientCreatePage() {
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <Button type="submit" disabled={processing}>
-            Save Patient
-          </Button>
+        {/* Buttons */}
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
+            <Button type="submit" disabled={processing} onClick={() => setData('intent', 'save')}>
+              Save Patient
+            </Button>
+
+            <Button
+              type="submit"
+              disabled={processing}
+              onClick={() => setData('intent', 'save_and_add_request')}
+            >
+              Save Patient & Add Request
+            </Button>
+          </div>
+
           <Link href="/patients">
             <Button type="button" variant="outline">
               Cancel

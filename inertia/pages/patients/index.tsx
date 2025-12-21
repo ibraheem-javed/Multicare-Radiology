@@ -1,6 +1,15 @@
 import { Link, usePage } from '@inertiajs/react'
+import { useState, useMemo } from 'react'
 import { Button } from '~/components/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
+import { Input } from '~/components/ui/input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table'
 
 type Patient = {
   id: string
@@ -15,6 +24,19 @@ type Patient = {
 
 export default function PatientsIndex() {
   const { patients } = usePage<{ patients: Patient[] }>().props
+  const [search, setSearch] = useState('')
+
+  const filteredPatients = useMemo(() => {
+    if (!search) return patients
+
+    const q = search.toLowerCase()
+
+    return patients.filter((p) =>
+      [p.firstName, p.lastName, p.medicalRecordNumber, p.phone, p.city]
+        .filter(Boolean)
+        .some((v) => v!.toLowerCase().includes(q))
+    )
+  }, [patients, search])
 
   return (
     <div className="space-y-6">
@@ -26,6 +48,14 @@ export default function PatientsIndex() {
         </Link>
       </div>
 
+      {/* 🔍 Client-side search */}
+      <Input
+        placeholder="Search name, MRN, phone, city..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="max-w-sm"
+      />
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -35,12 +65,12 @@ export default function PatientsIndex() {
             <TableHead>Gender</TableHead>
             <TableHead>City</TableHead>
             <TableHead>Phone</TableHead>
-            <TableHead></TableHead>
+            <TableHead />
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {patients.map((p) => (
+          {filteredPatients.map((p) => (
             <TableRow key={p.id}>
               <TableCell>
                 <span className="font-mono text-xs">{p.medicalRecordNumber}</span>
@@ -59,6 +89,14 @@ export default function PatientsIndex() {
               </TableCell>
             </TableRow>
           ))}
+
+          {filteredPatients.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center text-muted-foreground">
+                No patients found
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>

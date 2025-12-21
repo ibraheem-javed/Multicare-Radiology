@@ -12,7 +12,7 @@ import DeleteReport from '#actions/reports/delete'
 import { toReportViewList, toReportDetailedView } from '#dtos/report/report_view'
 import { toReportForm } from '#dtos/report/report_form'
 import { toRadiologistDropdownList } from '#dtos/report/radiologist_dropdown'
-import { toDropdownList } from '#dtos/request/request_dropdown'
+import { toPatientRequests } from '#dtos/request/request_dropdown'
 
 @inject()
 export default class ReportsController {
@@ -37,15 +37,16 @@ export default class ReportsController {
     const { requests, radiologists } = await this.getDataForCreate.handle()
 
     return inertia.render('reports/create', {
-      requests: toDropdownList(requests),
+      patients: toPatientRequests(requests),
       radiologists: toRadiologistDropdownList(radiologists),
     })
   }
 
   async store(ctx: HttpContext) {
     const { request, response } = ctx
+    console.log(request.all())
     const data = await request.validateUsing(reportValidator)
-
+    console.log(data)
     await this.createReport.handle(ctx, data)
     return response.redirect().toPath('/reports')
   }

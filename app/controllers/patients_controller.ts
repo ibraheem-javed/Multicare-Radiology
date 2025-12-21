@@ -43,10 +43,17 @@ export default class PatientsController {
   async store(ctx: HttpContext) {
     const { request, response, session } = ctx
 
+    const payload = request.all()
     const data = await request.validateUsing(patientValidator)
-    await this.createPatient.handle(ctx, data)
+
+    const patient = await this.createPatient.handle(ctx, data)
 
     session.flash('success', 'Patient created successfully')
+
+    if (payload.intent === 'save_and_add_request') {
+      return response.redirect().toPath(`/requests/create?patientId=${patient.id}`)
+    }
+
     return response.redirect().toPath('/patients')
   }
 

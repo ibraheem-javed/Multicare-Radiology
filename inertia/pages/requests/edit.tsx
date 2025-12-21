@@ -11,6 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { Popover, PopoverTrigger, PopoverContent } from '~/components/ui/popover'
+import { cn } from '~/lib/utils'
+import { CalendarIcon } from 'lucide-react'
+import { Calendar } from '~/components/ui/calendar'
+import { format } from 'date-fns'
 
 type Patient = { id: string; firstName: string; lastName: string }
 type Requester = { id: string; name: string; additionalInformation?: string | null }
@@ -26,6 +31,8 @@ type Request = {
 }
 
 export default function RequestEditPage() {
+  const [dateOpen, setDateOpen] = useState(false)
+
   const { request, patients, requesters } = usePage<{
     request: Request
     patients: Patient[]
@@ -145,15 +152,49 @@ export default function RequestEditPage() {
                 />
               </div>
 
-              {/* Date */}
-              <div className="space-y-1">
+              {/* Request Date */}
+              <div className="space-y-2">
                 <Label>Request Date</Label>
-                <Input
-                  type="date"
-                  value={data.requestDate}
-                  onChange={(e) => setData('requestDate', e.target.value)}
-                  aria-errormessage={errors?.requestDate}
-                />
+
+                <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !data.requestDate && 'text-muted-foreground'
+                      )}
+                      aria-invalid={Boolean(errors?.requestDate)}
+                      aria-describedby="request-date-error"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {data.requestDate ? format(new Date(data.requestDate), 'PPP') : 'Pick a date'}
+                    </Button>
+                  </PopoverTrigger>
+
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={data.requestDate ? new Date(data.requestDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          setData('requestDate', format(date, 'yyyy-MM-dd'))
+                          setDateOpen(false) // ✅ close on select
+                        }
+                      }}
+                      captionLayout="dropdown"
+                      startMonth={new Date(1990, 0)}
+                      endMonth={new Date(new Date().getFullYear() + 5, 11)}
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                {errors?.requestDate && (
+                  <p id="request-date-error" className="text-sm text-destructive">
+                    {errors.requestDate}
+                  </p>
+                )}
               </div>
 
               {/* Status */}

@@ -12,18 +12,27 @@ import {
   SelectItem,
 } from '~/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Popover, PopoverTrigger, PopoverContent } from '~/components/ui/popover'
+import { cn } from '~/lib/utils'
+import { CalendarIcon } from 'lucide-react'
+import { Calendar } from '~/components/ui/calendar'
+import { format } from 'date-fns'
 
 type Patient = { id: string; firstName: string; lastName: string }
 type Requester = { id: string; name: string; additionalInformation?: string | null }
 
 export default function RequestCreatePage() {
-  const { patients, requesters } = usePage<{
+  const [dateOpen, setDateOpen] = useState(false)
+
+  const { patients, requesters, preselectedPatientId } = usePage<{
     patients: Patient[]
     requesters: Requester[]
+    preselectedPatientId?: string | null
   }>().props
 
+  // Initialize form with preselected patient if provided
   const { data, setData, post, errors, processing } = useForm({
-    patientId: '',
+    patientId: preselectedPatientId ?? '',
     procedureType: '',
     requesterName: '',
     requesterId: '',
@@ -70,10 +79,20 @@ export default function RequestCreatePage() {
             {/* Patient */}
             <div className="space-y-2">
               <Label>Patient</Label>
-              <Select value={data.patientId} onValueChange={(value) => setData('patientId', value)}>
+              <Select
+                value={data.patientId}
+                onValueChange={(value) => {
+                  // Only allow changing if there is no preselected patient
+                  if (!preselectedPatientId) {
+                    setData('patientId', value)
+                  }
+                }}
+                disabled={Boolean(preselectedPatientId)}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Patient" />
                 </SelectTrigger>
+
                 <SelectContent>
                   {patients.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
@@ -82,11 +101,14 @@ export default function RequestCreatePage() {
                   ))}
                 </SelectContent>
               </Select>
-              {errors?.patientId && (
-                <p id="roleId-error" className="text-red-400 text-sm">
-                  {errors.patientId}
+
+              {preselectedPatientId && (
+                <p className="text-xs text-muted-foreground">
+                  Patient selected from patient creation
                 </p>
               )}
+
+              {errors?.patientId && <p className="text-red-400 text-sm">{errors.patientId}</p>}
             </div>
 
             {/* Procedure */}
@@ -100,7 +122,7 @@ export default function RequestCreatePage() {
               />
             </div>
 
-            {/* Requester (COMPLEX — untouched logic) */}
+            {/* Requester */}
             <div className="space-y-2 relative">
               <Label>Requester</Label>
               <Input
@@ -142,12 +164,43 @@ export default function RequestCreatePage() {
             {/* Request Date */}
             <div className="space-y-2">
               <Label>Request Date</Label>
-              <Input
-                type="date"
-                value={data.requestDate}
-                onChange={(e) => setData('requestDate', e.target.value)}
-                aria-errormessage={errors?.requestDate}
-              />
+              <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !data.requestDate && 'text-muted-foreground'
+                    )}
+                    aria-invalid={Boolean(errors?.requestDate)}
+                    aria-describedby="request-date-error"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {data.requestDate ? format(new Date(data.requestDate), 'PPP') : 'Pick a date'}
+                  </Button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={data.requestDate ? new Date(data.requestDate) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        setData('requestDate', format(date, 'yyyy-MM-dd'))
+                        setDateOpen(false)
+                      }
+                    }}
+                    captionLayout="dropdown"
+                    startMonth={new Date(1990, 0)}
+                    endMonth={new Date(new Date().getFullYear() + 5, 11)}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              {errors?.requestDate && (
+                <p className="text-sm text-destructive">{errors.requestDate}</p>
+              )}
             </div>
 
             <Button type="submit" disabled={processing}>
