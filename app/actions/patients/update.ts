@@ -1,10 +1,9 @@
 import Patient from '#models/patient'
-import type { HttpContext } from '@adonisjs/core/http'
+
 import { DateTime } from 'luxon'
 
 export default class UpdatePatient {
   async handle(
-    ctx: HttpContext,
     id: string,
     data: {
       firstName: string
@@ -24,7 +23,6 @@ export default class UpdatePatient {
     }
   ) {
     const patient = await Patient.findOrFail(id)
-    const oldData = patient.toJSON()
     const { dateOfBirth, ...rest } = data
     const updateData = {
       ...rest,

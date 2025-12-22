@@ -1,12 +1,10 @@
 import Request from '#models/request'
 import { RequestStatus } from '#enums/request_status'
 import { DateTime } from 'luxon'
-import type { HttpContext } from '@adonisjs/core/http'
 import Requester from '#models/requester'
 
 export default class UpdateRequest {
   async handle(
-    ctx: HttpContext,
     id: string,
     data: {
       patientId?: string
@@ -19,7 +17,6 @@ export default class UpdateRequest {
     }
   ) {
     const request = await Request.findOrFail(id)
-    const oldData = request.toJSON()
 
     let requesterId = data.requesterId
 

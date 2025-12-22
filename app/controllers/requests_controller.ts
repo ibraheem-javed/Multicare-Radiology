@@ -38,7 +38,7 @@ export default class RequestsController {
 
   async show(ctx: HttpContext) {
     const { params, inertia } = ctx
-    const request = await this.getRequest.handleForShow(ctx, params.id)
+    const request = await this.getRequest.handleForShow(params.id)
 
     return inertia.render('requests/show', {
       request: toRequestView(request),
@@ -85,18 +85,17 @@ export default class RequestsController {
 
   async update(ctx: HttpContext) {
     const { params, request, response } = ctx
-    console.log('controller hitting')
-    console.log('data for valudation is', request.all())
+
     const data = await request.validateUsing(requestValidator)
-    console.log('validated data is', data)
-    await this.updateRequest.handle(ctx, params.id, data)
+
+    await this.updateRequest.handle(params.id, data)
     return response.redirect().toPath(`/requests/${params.id}`)
   }
 
   async destroy(ctx: HttpContext) {
     const { params, response } = ctx
 
-    await this.deleteRequest.handle(ctx, params.id)
+    await this.deleteRequest.handle(params.id)
     return response.redirect().toPath('/requests')
   }
 }
