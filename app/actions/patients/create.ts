@@ -1,8 +1,6 @@
 import Patient from '#models/patient'
 import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
-import LogAction from '#actions/audit/log'
-import { EntityType } from '#enums/entity_type'
 
 export default class CreatePatient {
   async handle(
@@ -40,10 +38,7 @@ export default class CreatePatient {
 
     const patient = await Patient.create(payload)
 
-    if (ctx.auth.user) {
-      const logAction = new LogAction(ctx)
-      await logAction.logCreated(ctx.auth.user.id, EntityType.PATIENT, patient.id, patient.toJSON())
-    }
+    ctx.createdEntityId = patient.id
 
     return patient
   }

@@ -53,7 +53,7 @@ export default class ReportsController {
 
   async show(ctx: HttpContext) {
     const { params, inertia } = ctx
-    const report = await this.getReport.handleForShow(ctx, params.id)
+    const report = await this.getReport.handleForShow(params.id)
 
     return inertia.render('reports/show', {
       report: toReportDetailedView(report),
@@ -74,14 +74,14 @@ export default class ReportsController {
     const { params, request, response } = ctx
     const data = await request.validateUsing(updateReportValidator)
 
-    await this.updateReport.handle(ctx, params.id, data)
+    await this.updateReport.handle(params.id, data)
     return response.redirect().toPath(`/reports/${params.id}`)
   }
 
   async destroy(ctx: HttpContext) {
     const { params, response } = ctx
 
-    await this.deleteReport.handle(ctx, params.id)
+    await this.deleteReport.handle(params.id)
     return response.redirect().toPath('/reports')
   }
 }

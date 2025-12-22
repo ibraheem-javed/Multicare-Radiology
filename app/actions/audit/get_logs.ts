@@ -6,14 +6,13 @@ type GetLogsParams = {
   entityType?: string
   action?: string
   userId?: string
-  entityId?: string
   startDate?: string
   endDate?: string
 }
 
 export default class GetLogs {
   async handle(params: GetLogsParams) {
-    const { page, perPage, entityType, action, userId, entityId, startDate, endDate } = params
+    const { page, perPage, entityType, action, userId, startDate, endDate } = params
 
     const query = AuditLog.query().preload('user').orderBy('created_at', 'desc')
 
@@ -27,10 +26,6 @@ export default class GetLogs {
 
     if (userId) {
       query.where('user_id', userId)
-    }
-
-    if (entityId) {
-      query.where('entity_id', entityId)
     }
 
     if (startDate) {

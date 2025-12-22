@@ -29,7 +29,7 @@ export default class PatientsController {
 
   async show(ctx: HttpContext) {
     const { params, inertia } = ctx
-    const patient = await this.getPatient.handle(ctx, params.id)
+    const patient = await this.getPatient.handle(params.id)
 
     return inertia.render('patients/show', {
       patient: toPatientView(patient),
@@ -59,7 +59,7 @@ export default class PatientsController {
 
   async showEditForm(ctx: HttpContext) {
     const { params, inertia } = ctx
-    const patient = await this.getPatient.handle(ctx, params.id)
+    const patient = await this.getPatient.handle(params.id)
 
     return inertia.render('patients/edit', {
       patient: toPatientForm(patient),
@@ -69,7 +69,7 @@ export default class PatientsController {
   async update(ctx: HttpContext) {
     const { params, request, response } = ctx
     const data = await request.validateUsing(patientValidator)
-    await this.updatePatient.handle(ctx, params.id, data)
+    await this.updatePatient.handle(params.id, data)
 
     return response.redirect().toPath(`/patients/${params.id}`)
   }
@@ -77,7 +77,7 @@ export default class PatientsController {
   async destroy(ctx: HttpContext) {
     const { params, response } = ctx
 
-    await this.deletePatient.handle(ctx, params.id)
+    await this.deletePatient.handle(params.id)
     return response.redirect().toPath('/patients')
   }
 }

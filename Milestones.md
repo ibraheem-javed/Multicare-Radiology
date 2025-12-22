@@ -5,6 +5,7 @@
 You have established **excellent architectural foundations**:
 
 ✅ **Good Decisions Made:**
+
 - **Clean layered architecture**: Controllers → Actions → Models (proper separation of concerns)
 - **Proper validation layer**: VineJS validators separate from business logic
 - **RESTful CRUD patterns**: Standard resource operations implemented correctly
@@ -20,23 +21,23 @@ You have established **excellent architectural foundations**:
 
 **What's Well-Separated:**
 
-| Layer | Status | Examples |
-|-------|--------|----------|
-| **Controllers** | ✅ Good | Clean, minimal HTTP handling in PatientsController |
-| **Actions** | ✅ Good | Business logic isolated (CreatePatient, UpdatePatient, etc.) |
-| **Validators** | ✅ Good | VineJS validators properly separated |
-| **Models** | ✅ Good | ORM models with relationships defined |
-| **Database** | ✅ Good | Migrations with proper schema |
+| Layer           | Status  | Examples                                                     |
+| --------------- | ------- | ------------------------------------------------------------ |
+| **Controllers** | ✅ Good | Clean, minimal HTTP handling in PatientsController           |
+| **Actions**     | ✅ Good | Business logic isolated (CreatePatient, UpdatePatient, etc.) |
+| **Validators**  | ✅ Good | VineJS validators properly separated                         |
+| **Models**      | ✅ Good | ORM models with relationships defined                        |
+| **Database**    | ✅ Good | Migrations with proper schema                                |
 
 **What's Missing/Incomplete:**
 
-| Layer | Issue | Impact |
-|-------|-------|--------|
-| **Audit Logging** | ❌ No separate layer | Can't track who changed what, when, why |
-| **Access Control** | ❌ Not separated | No middleware for role-based permissions |
-| **Activity Tracking** | ❌ Missing entirely | Compliance requirement violated |
-| **Consent Management** | ❌ Missing | No way to record patient consent |
-| **Allergies/Diagnosis** | ❌ Missing from model | Incomplete patient records |
+| Layer                   | Issue                 | Impact                                   |
+| ----------------------- | --------------------- | ---------------------------------------- |
+| **Audit Logging**       | ❌ No separate layer  | Can't track who changed what, when, why  |
+| **Access Control**      | ❌ Not separated      | No middleware for role-based permissions |
+| **Activity Tracking**   | ❌ Missing entirely   | Compliance requirement violated          |
+| **Consent Management**  | ❌ Missing            | No way to record patient consent         |
+| **Allergies/Diagnosis** | ❌ Missing from model | Incomplete patient records               |
 
 ---
 
@@ -46,33 +47,33 @@ Based on **Requirements.md**, here are the gaps between what's required and what
 
 ### **CRITICAL (Audit & Access Control):**
 
-| Requirement | Current Status | Impact |
-|-------------|---|---|
-| **Unique Patient Identifier** | ❌ Missing | Requirements demand CNIC/Health ID/System ID - you only have auto-increment |
-| **Access Control** | ❌ Not Implemented | No authorization - all auth users can access all records |
-| **Audit Trail** | ❌ Missing | No log of who accessed/modified records, when, why |
-| **Date/Time Tracking** | ⚠️ Partial | Have `created_at`/`updated_at`, missing "time of entry" granularity |
+| Requirement                   | Current Status     | Impact                                                                      |
+| ----------------------------- | ------------------ | --------------------------------------------------------------------------- |
+| **Unique Patient Identifier** | ❌ Missing         | Requirements demand CNIC/Health ID/System ID - you only have auto-increment |
+| **Access Control**            | ❌ Not Implemented | No authorization - all auth users can access all records                    |
+| **Audit Trail**               | ❌ Missing         | No log of who accessed/modified records, when, why                          |
+| **Date/Time Tracking**        | ⚠️ Partial         | Have `created_at`/`updated_at`, missing "time of entry" granularity         |
 
 ### **IMPORTANT (Patient Data):**
 
-| Requirement | Current Status | Field Name |
-|-------------|---|---|
-| **Unique identifying number** | ❌ Missing | Need `medical_record_number` or `patient_identifier` |
-| **Address** | ❌ Missing | Need address field |
-| **Emergency Contact** | ❌ Missing | Need emergency contact info |
-| **Provisional Diagnosis** | ❌ Missing | Need diagnosis field on patient or request |
-| **Patient Allergies** | ❌ Missing | Need allergies field |
-| **Consent Documentation** | ❌ Missing | Need consent table/field |
-| **Procedure Outcome** | ⚠️ Partial | Have procedure type, missing detailed outcome |
-| **Professional Name** | ✅ Present | Have `radiologist_id` in reports |
+| Requirement                   | Current Status | Field Name                                           |
+| ----------------------------- | -------------- | ---------------------------------------------------- |
+| **Unique identifying number** | ❌ Missing     | Need `medical_record_number` or `patient_identifier` |
+| **Address**                   | ❌ Missing     | Need address field                                   |
+| **Emergency Contact**         | ❌ Missing     | Need emergency contact info                          |
+| **Provisional Diagnosis**     | ❌ Missing     | Need diagnosis field on patient or request           |
+| **Patient Allergies**         | ❌ Missing     | Need allergies field                                 |
+| **Consent Documentation**     | ❌ Missing     | Need consent table/field                             |
+| **Procedure Outcome**         | ⚠️ Partial     | Have procedure type, missing detailed outcome        |
+| **Professional Name**         | ✅ Present     | Have `radiologist_id` in reports                     |
 
 ### **IMPORTANT (Reporting):**
 
-| Requirement | Current Status | Issue |
-|-------------|---|---|
-| **Timely Reporting** | ❌ Missing | No turnaround time tracking or alerts |
-| **Report Status Tracking** | ✅ Present | Draft/Final exists |
-| **Time of Completion** | ⚠️ Partial | Have date, missing exact time for urgent cases |
+| Requirement                | Current Status | Issue                                          |
+| -------------------------- | -------------- | ---------------------------------------------- |
+| **Timely Reporting**       | ❌ Missing     | No turnaround time tracking or alerts          |
+| **Report Status Tracking** | ✅ Present     | Draft/Final exists                             |
+| **Time of Completion**     | ⚠️ Partial     | Have date, missing exact time for urgent cases |
 
 ---
 
@@ -81,9 +82,11 @@ Based on **Requirements.md**, here are the gaps between what's required and what
 Here's the phased approach to meet compliance requirements while keeping your existing patterns:
 
 ### **PHASE 0: Immediate (Foundation)**
-*Timeline: These should be done first as they affect everything else*
+
+_Timeline: These should be done first as they affect everything else_
 
 #### **Milestone 0.1 - Enhanced Patient Records** ✅ COMPLETED
+
 ```
 Add mandatory fields to Patient model:
   - medical_record_number (unique, system-generated or CNIC) ✅
@@ -103,6 +106,7 @@ Files created/modified:
 ```
 
 #### **Milestone 0.2 - Audit Logging Foundation** ✅ COMPLETED
+
 ```
 Create audit trail capability:
 
@@ -128,6 +132,7 @@ Files created:
 ```
 
 #### **Milestone 0.3 - Consent Management** ❌ NOT STARTED
+
 ```
 Create consent tracking:
 
@@ -151,9 +156,11 @@ Files to create:
 ---
 
 ### **PHASE 1: Access Control (Week 1)**
-*Implement authorization so only authorized staff can access records*
+
+_Implement authorization so only authorized staff can access records_
 
 #### **Milestone 1.1 - Role-Based Access Control (RBAC)** ⚠️ PARTIALLY IMPLEMENTED
+
 ```
 Define roles in existing Role model:
   - ADMIN (full access)
@@ -172,6 +179,7 @@ Routes to update:
 ```
 
 #### **Milestone 1.2 - Activity Logging Middleware** ✅ COMPLETED
+
 ```
 Implement automatic logging of all data access/changes:
 
@@ -190,9 +198,11 @@ This middleware:
 ---
 
 ### **PHASE 2: Enhanced Record Keeping (Week 2)**
-*Implement detailed medical record fields per requirements*
+
+_Implement detailed medical record fields per requirements_
 
 #### **Milestone 2.1 - Request Enhancement** ❌ NOT STARTED
+
 ```
 Add to Request model:
   - provisional_diagnosis (required field)
@@ -209,6 +219,7 @@ Files to update:
 ```
 
 #### **Milestone 2.2 - Report Enhancement** ❌ NOT STARTED
+
 ```
 Add to Report model:
   - procedure_date_time (date + exact time, not just date)
@@ -226,6 +237,7 @@ Files to update:
 ```
 
 #### **Milestone 2.3 - Clinical Notes** ❌ NOT STARTED
+
 ```
 Create new model: ClinicalNote
   - id (UUID)
@@ -248,9 +260,11 @@ Files to create:
 ---
 
 ### **PHASE 3: Reporting & Compliance (Week 3)**
-*Add features to track and report on compliance metrics*
+
+_Add features to track and report on compliance metrics_
 
 #### **Milestone 3.1 - Turnaround Time Tracking** ❌ NOT STARTED
+
 ```
 Create reporting dashboard:
 
@@ -267,6 +281,7 @@ Track:
 ```
 
 #### **Milestone 3.2 - Audit Trail Report** ✅ PARTIALLY COMPLETED
+
 ```
 Create audit trail viewer:
 
@@ -284,6 +299,7 @@ Note: Routes need to be registered and integrated into navigation
 ```
 
 #### **Milestone 3.3 - Data Export for Compliance** ❌ NOT STARTED
+
 ```
 Create data export functionality:
 
@@ -299,9 +315,11 @@ Used for:
 ---
 
 ### **PHASE 4: Quality Improvements (Week 4+)**
-*Polish and optimize*
+
+_Polish and optimize_
 
 #### **Milestone 4.1 - Record Validation** ❌ NOT STARTED
+
 ```
 Create validators to ensure complete records:
   - Patient records have all mandatory fields
@@ -310,6 +328,7 @@ Create validators to ensure complete records:
 ```
 
 #### **Milestone 4.2 - Archive System** ❌ NOT STARTED
+
 ```
 Old records (>3 years) should be:
   - Moved to archive storage
@@ -318,6 +337,7 @@ Old records (>3 years) should be:
 ```
 
 #### **Milestone 4.3 - Performance Optimization** ❌ NOT STARTED
+
 ```
 With audit logs and large datasets:
   - Add database indexes
@@ -349,6 +369,7 @@ Start with this exact order to avoid rework:
 ## 6. SUMMARY CHECKLIST
 
 ### ✅ What You're Doing Right:
+
 - [x] Clean architecture with proper separation (Controllers → Actions → Models)
 - [x] Database migrations with proper relationships
 - [x] Type-safe validation layer
@@ -361,6 +382,7 @@ Start with this exact order to avoid rework:
 - [x] Activity logging middleware - ADDED
 
 ### ⚠️ What Needs Adding:
+
 - [ ] Patient diagnosis field (currently missing - would go in Request)
 - [ ] Access control/authorization checks (middleware exists but not integrated)
 - [ ] Consent documentation
@@ -372,6 +394,7 @@ Start with this exact order to avoid rework:
 - [ ] Archive system for records >3 years
 
 ### ⚠️ Potential Issues to Watch:
+
 - Patient model uses `number` for ID instead of UUID (fix in next phase)
 - All authenticated users have same permissions (implement RBAC via check_role_middleware)
 - No timestamp granularity for exact time of entry (need DateTime, not just Date for some fields)
@@ -383,12 +406,15 @@ Start with this exact order to avoid rework:
 ## Next Steps
 
 ### Current Progress Summary
+
 ✅ **Phase 0 Status: 66% Complete (2/3 milestones done)**
+
 - ✅ Phase 0.1: Enhanced Patient Records - COMPLETE
 - ✅ Phase 0.2: Audit Logging Foundation - COMPLETE
 - ❌ Phase 0.3: Consent Management - NOT STARTED
 
 ✅ **Phase 1 Status: 50% Complete (1/2 milestones done)**
+
 - ⚠️ Phase 1.1: RBAC Middleware - EXISTS but needs integration
 - ✅ Phase 1.2: Activity Logging Middleware - COMPLETE
 
@@ -406,6 +432,7 @@ Start with this exact order to avoid rework:
 6. **Phase 2.3** - Clinical Notes Implementation
 
 ### Which would you like to work on?
+
 - Implement Consent Management (Phase 0.3)
 - Integrate RBAC middleware into routes (Phase 1.1)
 - Register Audit Logs routes and add to navigation (quick win)
