@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { Link, usePage } from '@inertiajs/react'
 import { useState, useMemo } from 'react'
 import { Button } from '~/components/ui/button'
@@ -103,3 +104,70 @@ export default function ReportsIndex() {
     </div>
   )
 }
+=======
+import { Link, usePage } from '@inertiajs/react'
+import { Button } from '~/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table'
+
+type Report = {
+  id: string
+  patient: { firstName: string; lastName: string } | null
+  radiologist?: { firstName: string; lastName: string } | null
+  reportDate: string
+  status: string
+  findingsPreview: string
+}
+
+export default function ReportsIndex() {
+  const { reports } = usePage<{ reports: Report[] }>().props
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Reports</h1>
+        <Link href="/reports/create">
+          <Button>Add Report</Button>
+        </Link>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Patient</TableHead>
+            <TableHead>Radiologist</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {reports.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell>
+                {r.patient ? `${r.patient.firstName} ${r.patient.lastName}` : '-'}
+              </TableCell>
+              <TableCell>
+                {r.radiologist ? `${r.radiologist.firstName} ${r.radiologist.lastName}` : '-'}
+              </TableCell>
+              <TableCell>{r.reportDate}</TableCell>
+              <TableCell className="capitalize">{r.status}</TableCell>
+              <TableCell className="text-right">
+                <Link href={`/reports/${r.id}`} className="text-blue-600 hover:underline">
+                  View
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+>>>>>>> Stashed changes

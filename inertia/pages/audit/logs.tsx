@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { usePage, router } from '@inertiajs/react'
 import { Head } from '@inertiajs/react'
+import { format } from 'date-fns'
+import { CalendarIcon } from 'lucide-react'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import {
   Select,
@@ -20,6 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
+import { Calendar } from '~/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
+import { cn } from '~/lib/utils'
 
 type AuditLog = {
   id: string
@@ -52,16 +56,23 @@ type Filters = {
   entityType?: string
   action?: string
   userId?: string
-  entityId?: string
   startDate?: string
   endDate?: string
 }
 
+type User = {
+  id: string
+  firstName: string
+  lastName: string | null
+  email: string
+}
+
 export default function AuditLogs() {
-  const { logs, pagination, filters } = usePage<{
+  const { logs, pagination, filters, users } = usePage<{
     logs: AuditLog[]
     pagination: Pagination
     filters: Filters
+    users: User[]
   }>().props
 
   const [localFilters, setLocalFilters] = useState<Filters>(filters || {})
@@ -72,7 +83,15 @@ export default function AuditLogs() {
   }
 
   const applyFilters = () => {
-    router.get('/audit-logs', localFilters)
+    // Map camelCase to snake_case for backend
+    const backendFilters: Record<string, any> = {}
+    if (localFilters.entityType) backendFilters.entity_type = localFilters.entityType
+    if (localFilters.action) backendFilters.action = localFilters.action
+    if (localFilters.userId) backendFilters.user_id = localFilters.userId
+    if (localFilters.startDate) backendFilters.start_date = localFilters.startDate
+    if (localFilters.endDate) backendFilters.end_date = localFilters.endDate
+
+    router.get('/audit-logs', backendFilters)
   }
 
   const resetFilters = () => {
@@ -81,7 +100,15 @@ export default function AuditLogs() {
   }
 
   const goToPage = (page: number) => {
-    router.get('/audit-logs', { ...localFilters, page })
+    // Map camelCase to snake_case for backend
+    const backendFilters: Record<string, any> = { page }
+    if (localFilters.entityType) backendFilters.entity_type = localFilters.entityType
+    if (localFilters.action) backendFilters.action = localFilters.action
+    if (localFilters.userId) backendFilters.user_id = localFilters.userId
+    if (localFilters.startDate) backendFilters.start_date = localFilters.startDate
+    if (localFilters.endDate) backendFilters.end_date = localFilters.endDate
+
+    router.get('/audit-logs', backendFilters)
   }
 
   const getActionBadgeColor = (action: string) => {
@@ -121,6 +148,7 @@ export default function AuditLogs() {
     'firstName',
     'lastName',
     'dateOfBirth',
+    'age',
     'gender',
     'phone',
     'nationalIdType',
@@ -135,34 +163,171 @@ export default function AuditLogs() {
     'updatedAt',
   ]
 
+  const requestFieldOrder = [
+    'id',
+    'patientName',
+    'procedureType',
+    'requesterId',
+    'requesterName',
+    'requesterInformation',
+    'requestDate',
+    'status',
+    'createdAt',
+    'updatedAt',
+  ]
+
+  const reportFieldOrder = [
+    'id',
+    'patientName',
+    'radiologistName',
+    'reportDate',
+    'status',
+    'findings',
+    'impression',
+    'createdAt',
+    'updatedAt',
+  ]
+
   const formatFieldName = (fieldName: string) => {
+    if (fieldName === 'patientName') return 'Patient Name'
+    if (fieldName === 'requesterId') return 'Requester ID'
+    if (fieldName === 'requesterName') return 'Requester Name'
+    if (fieldName === 'requesterInformation') return 'Requester Information'
+    if (fieldName === 'requestDate') return 'Request Date'
+    if (fieldName === 'procedureType') return 'Procedure Type'
+    if (fieldName === 'radiologistName') return 'Radiologist Name'
+    if (fieldName === 'reportDate') return 'Report Date'
+
     return fieldName
       .replace(/([A-Z])/g, ' $1')
       .replace(/^./, (str) => str.toUpperCase())
       .trim()
   }
 
-  const formatFieldValue = (value: any) => {
+  const stripHtmlTags = (html: string) => {
+    return html.replace(/<[^>]*>/g, '').trim()
+  }
+
+  const formatFieldValue = (value: any, fieldName?: string) => {
     if (value === null || value === undefined) return '-'
     if (typeof value === 'boolean') return value ? 'Yes' : 'No'
     if (typeof value === 'object') return JSON.stringify(value)
+
+    if (fieldName === 'findings' || fieldName === 'impression') {
+      return stripHtmlTags(String(value))
+    }
+
     return String(value)
   }
 
+  const transformRequestData = (data: Record<string, any>) => {
+    const transformed: Record<string, any> = {}
+
+    Object.keys(data).forEach((key) => {
+      if (key !== 'patient' && key !== 'requester') {
+        transformed[key] = data[key]
+      }
+    })
+
+    if (data.patient) {
+      transformed.patientName = `${data.patient.firstName} ${data.patient.lastName}`
+    } else if (data.patientId) {
+      transformed.patientName = `Patient ID: ${data.patientId}`
+    }
+
+    if (data.requester) {
+      transformed.requesterId = data.requester.id
+      transformed.requesterName = data.requester.name
+      transformed.requesterInformation = data.requester.additionalInformation || '-'
+    } else if (data.requesterId) {
+      transformed.requesterId = data.requesterId
+      transformed.requesterName = '-'
+      transformed.requesterInformation = '-'
+    }
+
+    return transformed
+  }
+
+  const transformReportData = (data: Record<string, any>) => {
+    const transformed: Record<string, any> = {}
+
+    Object.keys(data).forEach((key) => {
+      if (key !== 'patient' && key !== 'radiologist' && key !== 'request') {
+        transformed[key] = data[key]
+      }
+    })
+
+    if (data.patient) {
+      transformed.patientName = `${data.patient.firstName} ${data.patient.lastName}`
+    } else if (data.patientId) {
+      transformed.patientName = `Patient ID: ${data.patientId}`
+    }
+
+    if (data.radiologist) {
+      transformed.radiologistName = `${data.radiologist.firstName} ${
+        data.radiologist.lastName || ''
+      }`
+    } else if (data.radiologistId) {
+      transformed.radiologistName = `Radiologist ID: ${data.radiologistId}`
+    } else {
+      transformed.radiologistName = '-'
+    }
+
+    return transformed
+  }
+
   const getOrderedFields = (data: Record<string, any>, entityType: string) => {
+    let transformedData = data
+
     if (entityType === 'Patient') {
       return patientFieldOrder.filter((field) => field in data)
     }
+
+    if (entityType === 'Request') {
+      transformedData = transformRequestData(data)
+      return requestFieldOrder.filter((field) => field in transformedData)
+    }
+
+    if (entityType === 'Report') {
+      transformedData = transformReportData(data)
+      return reportFieldOrder.filter((field) => field in transformedData)
+    }
+
     return Object.keys(data)
+  }
+
+  const getTransformedFieldValue = (
+    field: string,
+    data: Record<string, any>,
+    entityType: string
+  ) => {
+    if (entityType === 'Request') {
+      const transformedData = transformRequestData(data)
+      return transformedData[field]
+    }
+    if (entityType === 'Report') {
+      const transformedData = transformReportData(data)
+      return transformedData[field]
+    }
+    return data[field]
   }
 
   const isFieldChanged = (
     field: string,
     oldData?: Record<string, any>,
-    newData?: Record<string, any>
+    newData?: Record<string, any>,
+    entityType?: string
   ) => {
     if (!oldData || !newData) return false
-    return oldData[field] !== newData[field]
+
+    const oldValue = entityType
+      ? getTransformedFieldValue(field, oldData, entityType)
+      : oldData[field]
+    const newValue = entityType
+      ? getTransformedFieldValue(field, newData, entityType)
+      : newData[field]
+
+    return oldValue !== newValue
   }
 
   return (
@@ -218,31 +383,85 @@ export default function AuditLogs() {
             </div>
 
             <div>
-              <Label>Entity ID</Label>
-              <Input
-                type="text"
-                placeholder="Filter by entity ID..."
-                value={localFilters.entityId || ''}
-                onChange={(e) => handleFilterChange('entityId', e.target.value)}
-              />
+              <Label>User</Label>
+              <Select
+                value={localFilters.userId || undefined}
+                onValueChange={(value) => handleFilterChange('userId', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All users" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.firstName} {user.lastName} ({user.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div>
+            <div className="max-w-[200px]">
               <Label>Start Date</Label>
-              <Input
-                type="date"
-                value={localFilters.startDate || ''}
-                onChange={(e) => handleFilterChange('startDate', e.target.value)}
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !localFilters.startDate && 'text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {localFilters.startDate ? (
+                      format(new Date(localFilters.startDate), 'PPP')
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={localFilters.startDate ? new Date(localFilters.startDate) : undefined}
+                    onSelect={(date) => {
+                      handleFilterChange('startDate', date ? format(date, 'yyyy-MM-dd') : '')
+                    }}
+                    captionLayout="dropdown"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
-            <div>
+            <div className="max-w-[200px]">
               <Label>End Date</Label>
-              <Input
-                type="date"
-                value={localFilters.endDate || ''}
-                onChange={(e) => handleFilterChange('endDate', e.target.value)}
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !localFilters.endDate && 'text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {localFilters.endDate ? (
+                      format(new Date(localFilters.endDate), 'PPP')
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={localFilters.endDate ? new Date(localFilters.endDate) : undefined}
+                    onSelect={(date) => {
+                      handleFilterChange('endDate', date ? format(date, 'yyyy-MM-dd') : '')
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
@@ -260,9 +479,8 @@ export default function AuditLogs() {
             <TableRow>
               <TableHead>Timestamp</TableHead>
               <TableHead>User</TableHead>
-              <TableHead>Action</TableHead>
               <TableHead>Entity</TableHead>
-              <TableHead>Entity ID</TableHead>
+              <TableHead>Action</TableHead>
               <TableHead>IP Address</TableHead>
               <TableHead>Details</TableHead>
             </TableRow>
@@ -271,122 +489,131 @@ export default function AuditLogs() {
           <TableBody>
             {logs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-gray-500">
+                <TableCell colSpan={6} className="text-center text-gray-500">
                   No audit logs found
                 </TableCell>
               </TableRow>
             ) : (
               logs.map((log) => (
-                  <>
-                    <TableRow key={log.id}>
-                      <TableCell className="text-xs">{formatDate(log.createdAt)}</TableCell>
-                      <TableCell>
-                        {log.user ? (
-                          <div>
-                            <div className="font-medium">
-                              {log.user.firstName} {log.user.lastName}
-                            </div>
-                            <div className="text-xs text-gray-600">{log.user.email}</div>
+                <>
+                  <TableRow key={log.id}>
+                    <TableCell className="text-xs">{formatDate(log.createdAt)}</TableCell>
+                    <TableCell>
+                      {log.user ? (
+                        <div>
+                          <div className="font-medium">
+                            {log.user.firstName} {log.user.lastName}
                           </div>
-                        ) : (
-                          <span className="text-gray-400">System</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getActionBadgeColor(log.action)}`}
+                          <div className="text-xs text-gray-600">{log.user.email}</div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">System</span>
+                      )}
+                    </TableCell>
+                    <TableCell>{log.entityType}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getActionBadgeColor(log.action)}`}
+                      >
+                        {log.action}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-xs">{log.ipAddress || '-'}</TableCell>
+                    <TableCell>
+                      {log.changes && (
+                        <button
+                          onClick={() => toggleExpand(log.id)}
+                          className="text-blue-600 hover:underline text-xs"
                         >
-                          {log.action}
-                        </span>
-                      </TableCell>
-                      <TableCell>{log.entityType}</TableCell>
-                      <TableCell>
-                        <span className="font-mono text-xs">{log.entityId.slice(0, 8)}...</span>
-                      </TableCell>
-                      <TableCell className="text-xs">{log.ipAddress || '-'}</TableCell>
-                      <TableCell>
-                        {log.changes && (
-                          <button
-                            onClick={() => toggleExpand(log.id)}
-                            className="text-blue-600 hover:underline text-xs"
-                          >
-                            {expandedLogId === log.id ? 'Hide' : 'Show'} changes
-                          </button>
-                        )}
+                          {expandedLogId === log.id ? 'Hide' : 'Show'} changes
+                        </button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+
+                  {expandedLogId === log.id && log.changes && (
+                    <TableRow className="bg-muted">
+                      <TableCell colSpan={6} className="p-4">
+                        <div className="space-y-4">
+                          <Table className="text-xs">
+                            <TableHeader>
+                              <TableRow
+                                onClick={() => toggleExpand(log.id)}
+                                className="cursor-pointer hover:bg-gray-100"
+                              >
+                                <TableHead>Field</TableHead>
+                                {log.changes!.old && <TableHead>Before</TableHead>}
+                                {log.changes!.new && <TableHead>After</TableHead>}
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {(() => {
+                                const changes = log.changes!
+                                const data = changes.old || changes.new || {}
+                                const fields = getOrderedFields(data, log.entityType)
+
+                                return fields.map((field) => {
+                                  const changed = isFieldChanged(
+                                    field,
+                                    changes.old,
+                                    changes.new,
+                                    log.entityType
+                                  )
+                                  const rowClass = changed ? 'bg-yellow-50' : ''
+
+                                  return (
+                                    <TableRow key={field} className={rowClass}>
+                                      <TableCell className="font-medium text-gray-700">
+                                        {formatFieldName(field)}
+                                      </TableCell>
+                                      {changes.old && (
+                                        <TableCell className="font-mono">
+                                          {formatFieldValue(
+                                            getTransformedFieldValue(
+                                              field,
+                                              changes.old,
+                                              log.entityType
+                                            ),
+                                            field
+                                          )}
+                                        </TableCell>
+                                      )}
+                                      {changes.new && (
+                                        <TableCell
+                                          className={`font-mono ${
+                                            changed ? 'font-semibold text-blue-700' : ''
+                                          }`}
+                                        >
+                                          {formatFieldValue(
+                                            getTransformedFieldValue(
+                                              field,
+                                              changes.new,
+                                              log.entityType
+                                            ),
+                                            field
+                                          )}
+                                        </TableCell>
+                                      )}
+                                    </TableRow>
+                                  )
+                                })
+                              })()}
+                            </TableBody>
+                          </Table>
+
+                          {log.userAgent && (
+                            <div>
+                              <h4 className="font-medium text-sm mb-1">User Agent:</h4>
+                              <p className="text-xs text-gray-600">{log.userAgent}</p>
+                            </div>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
-
-                    {expandedLogId === log.id && log.changes && (
-                      <TableRow className="bg-muted">
-                        <TableCell colSpan={7} className="p-4">
-                          <div className="space-y-4">
-                            <Table className="text-xs">
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Field</TableHead>
-                                  {log.changes!.old && (
-                                    <TableHead>Before</TableHead>
-                                  )}
-                                  {log.changes!.new && (
-                                    <TableHead>After</TableHead>
-                                  )}
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {(() => {
-                                  const changes = log.changes!
-                                  const data = changes.old || changes.new || {}
-                                  const fields = getOrderedFields(data, log.entityType)
-
-                                  return fields.map((field) => {
-                                    const changed = isFieldChanged(
-                                      field,
-                                      changes.old,
-                                      changes.new
-                                    )
-                                    const rowClass = changed
-                                      ? 'bg-yellow-50'
-                                      : ''
-
-                                    return (
-                                      <TableRow key={field} className={rowClass}>
-                                        <TableCell className="font-medium text-gray-700">
-                                          {formatFieldName(field)}
-                                        </TableCell>
-                                        {changes.old && (
-                                          <TableCell className="font-mono">
-                                            {formatFieldValue(changes.old[field])}
-                                          </TableCell>
-                                        )}
-                                        {changes.new && (
-                                          <TableCell
-                                            className={`font-mono ${
-                                              changed ? 'font-semibold text-blue-700' : ''
-                                            }`}
-                                          >
-                                            {formatFieldValue(changes.new[field])}
-                                          </TableCell>
-                                        )}
-                                      </TableRow>
-                                    )
-                                  })
-                                })()}
-                              </TableBody>
-                            </Table>
-
-                            {log.userAgent && (
-                              <div>
-                                <h4 className="font-medium text-sm mb-1">User Agent:</h4>
-                                <p className="text-xs text-gray-600">{log.userAgent}</p>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </>
-                ))
-              )}
+                  )}
+                </>
+              ))
+            )}
           </TableBody>
         </Table>
 

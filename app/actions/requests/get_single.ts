@@ -1,7 +1,5 @@
 import Request from '#models/request'
 import type { HttpContext } from '@adonisjs/core/http'
-import LogAction from '#actions/audit/log'
-import { EntityType } from '#enums/entity_type'
 
 export default class GetRequest {
   async handleForShow(ctx: HttpContext, id: string): Promise<Request> {
@@ -10,11 +8,6 @@ export default class GetRequest {
       .preload('patient')
       .preload('requester')
       .firstOrFail()
-
-    if (ctx.auth.user) {
-      const logAction = new LogAction(ctx)
-      await logAction.logAccessed(ctx.auth.user.id, EntityType.REQUEST, request.id)
-    }
 
     return request
   }
