@@ -63,8 +63,8 @@ export default class AuditMiddleware {
         if (entity) {
           oldData = entity.toJSON()
         }
-      } catch (error) {
-        console.error('Failed to fetch old entity state:', error)
+      } catch {
+        // Silently fail - entity might not exist or be inaccessible
       }
     }
 
@@ -84,7 +84,7 @@ export default class AuditMiddleware {
 
     let newData: Record<string, any> | undefined
 
-    if (method !== 'DELETE' && method !== 'GET') {
+    if (method !== 'DELETE') {
       try {
         const model = this.modelMap[entityType]
         const query = model.query().where('id', entityId)
@@ -95,8 +95,8 @@ export default class AuditMiddleware {
         if (entity) {
           newData = entity.toJSON()
         }
-      } catch (error) {
-        console.error('Failed to fetch new entity state:', error)
+      } catch {
+        // Silently fail - entity might not exist or be inaccessible
       }
     }
 
@@ -121,8 +121,8 @@ export default class AuditMiddleware {
         ipAddress: ctx.request.ip(),
         userAgent: ctx.request.header('user-agent'),
       })
-    } catch (error) {
-      console.error('Audit logging failed:', error)
+    } catch {
+      // Silently fail - audit logging should never disrupt user operations
     }
   }
 

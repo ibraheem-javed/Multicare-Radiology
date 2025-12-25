@@ -97,6 +97,7 @@ router
     router
       .group(() => {
         router.get('/', [AuditLogsController, 'index']).as('audit-logs.index')
+        router.get('/:id', [AuditLogsController, 'show']).as('audit-logs.show')
       })
       .prefix('audit-logs')
       .as('audit-logs')

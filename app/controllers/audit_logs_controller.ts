@@ -1,47 +1,63 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import GetLogs from '#actions/audit/get_logs'
-import ListUsers from '#actions/user/get_all'
+import GetPatientLogs from '#actions/audit/get_patient_logs'
+import SearchPatients from '#actions/audit/search_patients'
 
 @inject()
 export default class AuditLogsController {
   constructor(
     protected getAuditLogs: GetLogs,
-    protected listUsers: ListUsers
+    protected getPatientLogs: GetPatientLogs,
+    protected searchPatients: SearchPatients
   ) {}
 
   async index({ request, inertia }: HttpContext) {
-    const page = request.input('page', 1)
-    const perPage = 50
-    const entityType = request.input('entity_type')
-    const action = request.input('action')
-    const userId = request.input('user_id')
-    const startDate = request.input('start_date')
-    const endDate = request.input('end_date')
+    const search = request.input('search', '').trim()
 
-    const { logs, pagination } = await this.getAuditLogs.handle({
-      page,
-      perPage,
-      entityType,
-      action,
-      userId,
-      startDate,
-      endDate,
+    if (search) {
+      const patients = await this.searchPatients.handle(search)
+
+      return inertia.render('audit/logs', {
+        searchResults: patients,
+        searchTerm: search,
+        logs: [],
+        pagination: {
+          currentPage: 1,
+          lastPage: 1,
+          total: 0,
+          perPage: 100,
+        },
+      })
+    }
+
+    const { logs } = await this.getAuditLogs.handle({
+      page: 1,
+      perPage: 100,
     })
-
-    const users = await this.listUsers.handle()
 
     return inertia.render('audit/logs', {
       logs,
-      pagination,
-      users,
-      filters: {
-        entityType,
-        action,
-        userId,
-        startDate,
-        endDate,
+      searchResults: [],
+      searchTerm: '',
+      pagination: {
+        currentPage: 1,
+        lastPage: 1,
+        total: logs.length,
+        perPage: 100,
       },
+    })
+  }
+
+  async show({ params, inertia }: HttpContext) {
+    const { patient, patientLogs, requestLogs, reportLogs } =
+      await this.getPatientLogs.handle(params.id)
+
+    return inertia.render('audit/patient', {
+      patient,
+      patientLogs,
+      requestLogs,
+      reportLogs,
     })
   }
 }

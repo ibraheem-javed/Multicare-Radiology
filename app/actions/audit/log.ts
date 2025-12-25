@@ -81,12 +81,18 @@ export default class LogAction {
     })
   }
 
-  async logAccessed(userId: string, entityType: EntityType, entityId: string) {
+  async logAccessed(
+    userId: string,
+    entityType: EntityType,
+    entityId: string,
+    data?: Record<string, any>
+  ) {
     return this.handle({
       userId,
       action: AuditAction.ACCESSED,
       entityType,
       entityId,
+      changes: data ? { new: data } : undefined,
     })
   }
 }
