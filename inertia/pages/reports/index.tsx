@@ -84,8 +84,8 @@ export default function ReportsIndex() {
               <TableCell>{r.reportDate}</TableCell>
               <TableCell className="capitalize">{r.status}</TableCell>
               <TableCell className="text-right">
-                <Link href={`/reports/${r.id}`} className="text-blue-600 hover:underline">
-                  View
+                <Link href={`/reports/${r.id}`}>
+                  <Button size="sm">View</Button>
                 </Link>
               </TableCell>
             </TableRow>

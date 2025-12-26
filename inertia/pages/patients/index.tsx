@@ -83,8 +83,8 @@ export default function PatientsIndex() {
               <TableCell>{p.city}</TableCell>
               <TableCell>{p.phone || '-'}</TableCell>
               <TableCell className="text-right">
-                <Link href={`/patients/${p.id}`} className="text-blue-600 hover:underline">
-                  View
+                <Link href={`/patients/${p.id}`}>
+                  <Button size="sm">View</Button>
                 </Link>
               </TableCell>
             </TableRow>
