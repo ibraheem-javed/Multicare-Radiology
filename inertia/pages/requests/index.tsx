@@ -100,8 +100,8 @@ export default function RequestsIndex() {
                 <TableCell>{r.requestDate}</TableCell>
                 <TableCell className="capitalize">{r.status}</TableCell>
                 <TableCell className="text-right">
-                  <Link href={`/requests/${r.id}`} className="text-blue-600 hover:underline">
-                    View
+                  <Link href={`/requests/${r.id}`}>
+                    <Button size="sm">View</Button>
                   </Link>
                 </TableCell>
               </TableRow>

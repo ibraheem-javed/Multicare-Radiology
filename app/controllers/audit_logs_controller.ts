@@ -1,47 +1,32 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
-import GetLogs from '#actions/audit/get_logs'
-import ListUsers from '#actions/user/get_all'
+import GetPatientLogs from '#actions/audit/get_patient_logs'
+import GetPatientsByActivity from '#actions/audit/get_patients_by_activity'
 
 @inject()
 export default class AuditLogsController {
   constructor(
-    protected getAuditLogs: GetLogs,
-    protected listUsers: ListUsers
+    protected getPatientLogs: GetPatientLogs,
+    protected getPatientsByActivity: GetPatientsByActivity
   ) {}
 
-  async index({ request, inertia }: HttpContext) {
-    const page = request.input('page', 1)
-    const perPage = 50
-    const entityType = request.input('entity_type')
-    const action = request.input('action')
-    const userId = request.input('user_id')
-    const startDate = request.input('start_date')
-    const endDate = request.input('end_date')
-
-    const { logs, pagination } = await this.getAuditLogs.handle({
-      page,
-      perPage,
-      entityType,
-      action,
-      userId,
-      startDate,
-      endDate,
-    })
-
-    const users = await this.listUsers.handle()
+  async index({ inertia }: HttpContext) {
+    const patients = await this.getPatientsByActivity.handle()
 
     return inertia.render('audit/logs', {
-      logs,
-      pagination,
-      users,
-      filters: {
-        entityType,
-        action,
-        userId,
-        startDate,
-        endDate,
-      },
+      patients,
+    })
+  }
+
+  async show({ params, inertia }: HttpContext) {
+    const { patient, patientLogs, requestLogs, reportLogs } =
+      await this.getPatientLogs.handle(params.id)
+
+    return inertia.render('audit/patient', {
+      patient,
+      patientLogs,
+      requestLogs,
+      reportLogs,
     })
   }
 }
